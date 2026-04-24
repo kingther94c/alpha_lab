@@ -1,7 +1,7 @@
 # Defaults for signal backtests. Override in notebooks as needed.
 
 benchmark: SPY
-rebalance: "M"          # pandas offset alias: D / W / M / Q
+rebalance: "ME"         # pandas offset alias: D / W-FRI / ME / QE / YE
 costs:
   commission_bps: 1.0   # per trade, one-way
   slippage_bps: 2.0
