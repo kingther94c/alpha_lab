@@ -14,6 +14,7 @@ Instructions for any coding agent working in this repo.
 - **Do not create a `helpers.py` / `utils.py` grab-bag.** Use the existing submodules (`utils/`, `analytics/`, `features/`, etc.).
 - **Never modify files under `data/raw/`.** Treat raw data as read-only.
 - **Never commit** secrets, `.env`, or anything under `data/private/`.
+- **Always clear notebook outputs before committing notebooks.**
 - **Keep functions small and pure** where practical. Add docstrings on public functions. Type annotations where they help.
 - **Don't overengineer.** No config systems, plugin registries, or abstract base classes unless justified by real reuse.
 - **Backtrader is optional.** Don't centralize the design around any single backtest framework.
