@@ -1,0 +1,18 @@
+# Registry of data sources. Keep this lightweight — no security-master yet.
+# Each source names where credentials come from and any default params.
+
+sources:
+  yfinance:
+    enabled: true
+    notes: "Free, rate-limited. Good for ETF / FX / futures front-month proxies."
+
+  fred:
+    enabled: false
+    api_key_env: FRED_API_KEY
+    notes: "Macro / rates series."
+
+  ibkr:
+    enabled: false
+    user_env: IBKR_USER
+    pass_env: IBKR_PASS
+    notes: "Wire up later for live / brokerage data."

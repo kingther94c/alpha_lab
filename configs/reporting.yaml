@@ -1,0 +1,7 @@
+# Reporting / chart defaults.
+
+output_dir: reports
+chart:
+  width: 900
+  height: 500
+  template: plotly_white

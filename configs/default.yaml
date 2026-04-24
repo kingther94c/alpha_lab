@@ -1,0 +1,12 @@
+# Shared defaults. Put reusable project-wide knobs here.
+# One-off / research-specific parameters belong in the notebook, not here.
+
+project_name: alpha_lab
+timezone: America/New_York
+base_currency: USD
+
+# Default analysis window for new notebooks.
+date_range:
+  start: "2010-01-01"
+  end: null    # null = up to today
+trading_days_per_year: 252
