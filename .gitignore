@@ -1,0 +1,45 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# --- Environments ---
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# --- Editors / OS ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# --- Private data & outputs ---
+# Ignore private data but keep folder
+data/private/*
+!data/private/.gitkeep
+
+# Keep folder structure but ignore contents for local-only artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/features/*
+!data/features/.gitkeep
+data/results/*
+!data/results/.gitkeep
+
+reports/*
+!reports/.gitkeep
