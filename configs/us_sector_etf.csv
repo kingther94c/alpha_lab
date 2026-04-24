@@ -1,0 +1,12 @@
+sector,signal_etf,long_1x_etf,long_2x_etf,long_3x_etf,inverse_1x_etf,inverse_2x_etf,inverse_3x_etf,notes
+Communication Services,XLC,XLC,,,,,,No broad communication-services geared ETF mapped.
+Consumer Discretionary,XLY,XLY,UCC,WANT,,,,UCC is +2x and WANT is +3x.
+Consumer Staples,XLP,XLP,UGE,,,,SZK,UGE is +2x and SZK is -2x.
+Energy,XLE,XLE,DIG,,,DUG,,DIG/DUG and ERX/ERY are +2x/-2x.
+Financials,XLF,XLF,UYG,FAS,SEF,SKF,FAZ,SEF is -1x and SKF is -2x.
+Health Care,XLV,XLV,RXL,CURE,,RXD,SICK,RXL/RXD are +2x/-2x.
+Industrials,XLI,XLI,UXI,,,SIJ,,UXI is +2x and SIJ is -2x.
+Materials,XLB,XLB,UYM,MATL,,SMN,MATS,UYM/SMN are +2x/-2x.
+Real Estate,XLRE,XLRE,URE,DRN,,SRS,DRV,URE/SRS are +2x/-2x.
+Technology,XLK,XLK,ROM,TECL,,REW,TECS,ROM/REW are +2x/-2x.
+Utilities,XLU,XLU,UPW,UTSL,,SDP,,UPW/SDP are +2x/-2x and UTSL is +3x.

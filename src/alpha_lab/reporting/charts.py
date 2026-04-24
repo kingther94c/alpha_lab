@@ -6,11 +6,26 @@ customize, display inline, or write to HTML via ``reporting/render.py`` later.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pandas as pd
-import plotly.graph_objects as go
 
 from alpha_lab.analytics.returns import cumulative_returns, drawdown
 from alpha_lab.utils.config import load_config
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
+
+
+def _plotly_go():
+    try:
+        import plotly.graph_objects as go
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "Plotly is required for alpha_lab.reporting charts. Install project dependencies with "
+            '`pip install -e ".[dev]"`.'
+        ) from exc
+    return go
 
 
 def _layout_defaults() -> dict:
@@ -27,6 +42,7 @@ def _layout_defaults() -> dict:
 
 def equity_curve(returns: pd.Series | pd.DataFrame, name: str = "strategy") -> go.Figure:
     """Wealth index (starts at 1). Accepts a Series or DataFrame of streams."""
+    go = _plotly_go()
     eq = cumulative_returns(returns)
     fig = go.Figure()
     if isinstance(eq, pd.Series):
@@ -40,6 +56,7 @@ def equity_curve(returns: pd.Series | pd.DataFrame, name: str = "strategy") -> g
 
 def drawdown_chart(returns: pd.Series) -> go.Figure:
     """Filled drawdown area."""
+    go = _plotly_go()
     dd = drawdown(returns)
     fig = go.Figure()
     fig.add_scatter(x=dd.index, y=dd.values, fill="tozeroy", mode="lines", name="drawdown")
@@ -49,6 +66,7 @@ def drawdown_chart(returns: pd.Series) -> go.Figure:
 
 def heatmap_monthly(returns: pd.Series) -> go.Figure:
     """Year × month heatmap of compounded monthly returns."""
+    go = _plotly_go()
     from alpha_lab.backtest.metrics import monthly_table
 
     tbl = monthly_table(returns)
