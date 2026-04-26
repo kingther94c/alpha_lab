@@ -19,6 +19,16 @@ Instructions for any coding agent working in this repo.
 - **Don't overengineer.** No config systems, plugin registries, or abstract base classes unless justified by real reuse.
 - **Backtrader is optional.** Don't centralize the design around any single backtest framework.
 
+## Agent skills
+
+Use repo-relevant skills deliberately:
+
+- **GitHub skills**: use when asked to inspect PRs/issues, fix failing CI, address review comments, or publish local changes. Keep the commit scope tight and never include secrets, private data, raw data, or unrelated notebook output churn.
+- **OpenAI docs skill**: use for OpenAI API / model / prompt-upgrade work. Rely on official OpenAI docs rather than remembered API details.
+- **Google Drive / Sheets / Docs skills**: use only when the user explicitly references connected Drive files or wants data copied from external Sheets/Docs into the research workflow. Keep reusable analysis code in `src/alpha_lab/`, not in Drive-only artifacts.
+- **Playwright/browser skills**: use only for browser automation, web-app verification, or inspecting pages that cannot be handled with normal HTTP/data loaders. Do not use browser automation for ordinary notebook or pandas debugging.
+- **Notebook/research work**: no special external skill is required by default. Keep notebooks thin, clear outputs before commits, and move reusable data loading, optimization, analytics, and backtest logic into `src/alpha_lab/`.
+
 ## Making changes
 
 - Keep each change focused. If you spot unrelated issues, note them in your summary rather than fixing them inline.

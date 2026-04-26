@@ -1,0 +1,21 @@
+region,country,ticker,notes
+DM,Japan,EWJ,iShares MSCI Japan ETF
+DM,Germany,EWG,iShares MSCI Germany ETF
+DM,France,EWQ,iShares MSCI France ETF
+DM,United Kingdom,EWU,iShares MSCI United Kingdom ETF
+DM,Italy,EWI,iShares MSCI Italy ETF
+DM,Spain,EWP,iShares MSCI Spain ETF
+DM,Netherlands,EWN,iShares MSCI Netherlands ETF
+DM,Australia,EWA,iShares MSCI Australia ETF
+DM,Canada,EWC,iShares MSCI Canada ETF
+DM,Singapore,EWS,iShares MSCI Singapore ETF
+DM,Hong Kong,EWH,iShares MSCI Hong Kong ETF
+EM,Brazil,EWZ,iShares MSCI Brazil ETF
+EM,Mexico,EWW,iShares MSCI Mexico ETF
+EM,Korea,EWY,iShares MSCI South Korea ETF
+EM,Taiwan,EWT,iShares MSCI Taiwan ETF
+EM,China,MCHI,iShares MSCI China ETF
+EM,India,INDA,iShares MSCI India ETF
+EM,Turkey,TUR,iShares MSCI Turkey ETF
+EM,South Africa,EZA,iShares MSCI South Africa ETF
+EM,Indonesia,EIDO,iShares MSCI Indonesia ETF
