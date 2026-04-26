@@ -65,25 +65,29 @@ def drawdown_chart(returns: pd.Series) -> go.Figure:
 
 
 def heatmap_monthly(returns: pd.Series) -> go.Figure:
-    """Year × month heatmap of compounded monthly returns."""
+    """Year × month heatmap of compounded monthly returns, with underlined YTD totals."""
     go = _plotly_go()
     from alpha_lab.backtest.metrics import monthly_table
 
     tbl = monthly_table(returns)
-    month_cols = [c for c in tbl.columns if c != "YTD"]
-    z = tbl[month_cols].values
+    z = tbl.values
     text = [[f"{v * 100:.1f}%" if pd.notna(v) else "" for v in row] for row in z]
     fig = go.Figure(
         data=go.Heatmap(
             z=z,
-            x=month_cols,
+            x=tbl.columns,
             y=tbl.index.astype(str),
             colorscale="RdYlGn",
             zmid=0,
             text=text,
-            texttemplate="%{text}",
             hovertemplate="%{y} %{x}: %{text}<extra></extra>",
         )
     )
+    for row_idx, year in enumerate(tbl.index.astype(str)):
+        for col_idx, col in enumerate(tbl.columns):
+            cell_text = text[row_idx][col_idx]
+            if col == "YTD":
+                cell_text = f"<u>{cell_text}</u>"
+            fig.add_annotation(x=col, y=year, text=cell_text, showarrow=False, font={"color": "black"})
     fig.update_layout(title="Monthly returns", **_layout_defaults())
     return fig
