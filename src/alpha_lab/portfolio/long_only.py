@@ -9,6 +9,15 @@ from scipy.optimize import minimize
 from alpha_lab.data.calendars import rebalance_dates
 
 
+def fixed_weight_returns(returns: pd.DataFrame, weights: dict[str, float] | pd.Series) -> pd.Series:
+    """Return a static-weight portfolio; weights are exposures and need not sum to 1."""
+    w = pd.Series(weights, dtype=float)
+    missing = sorted(set(w.index) - set(returns.columns))
+    if missing:
+        raise ValueError(f"weights reference missing return columns: {missing}")
+    return returns.reindex(columns=w.index).mul(w, axis=1).sum(axis=1)
+
+
 def equal_weight_weights(columns: pd.Index | list[str], *, name: object | None = None) -> pd.Series:
     """Return fully-invested equal weights for the supplied asset names."""
     index = pd.Index(columns)

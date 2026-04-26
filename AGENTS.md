@@ -15,6 +15,8 @@ Instructions for any coding agent working in this repo.
 - **Never modify files under `data/raw/`.** Treat raw data as read-only.
 - **Never commit** secrets, `.env`, or anything under `data/private/`.
 - **Always clear notebook outputs before committing notebooks.**
+- **Avoid future information in backtests and signals.** Signals, weights, filters, normalizers, model fits, and risk estimates must use only data available at the decision timestamp. If a notebook intentionally uses forward returns or full-sample statistics to study a relationship, label it explicitly as research/diagnostic and do not present it as tradable performance.
+- **Trade after signal formation.** For reusable backtests, lag target weights or otherwise make the execution timing explicit. Do not let same-close signals earn same-close returns unless the notebook clearly documents that this is a non-tradable diagnostic.
 - **Keep functions small and pure** where practical. Add docstrings on public functions. Type annotations where they help.
 - **Don't overengineer.** No config systems, plugin registries, or abstract base classes unless justified by real reuse.
 - **Backtrader is optional.** Don't centralize the design around any single backtest framework.

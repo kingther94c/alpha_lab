@@ -3,10 +3,34 @@ import pandas as pd
 import pytest
 
 from alpha_lab.portfolio.long_only import (
+    fixed_weight_returns,
     inverse_volatility_weights,
     mean_variance_weights,
     rolling_momentum_weights,
 )
+
+
+def test_fixed_weight_returns_allows_weights_not_summing_to_one():
+    idx = pd.bdate_range("2024-01-02", periods=3)
+    returns = pd.DataFrame(
+        {
+            "SPY": [0.01, 0.02, -0.01],
+            "LQD": [0.001, 0.002, 0.003],
+        },
+        index=idx,
+    )
+
+    portfolio = fixed_weight_returns(returns, {"SPY": 0.8, "LQD": 1.0})
+
+    expected = returns["SPY"] * 0.8 + returns["LQD"]
+    pd.testing.assert_series_equal(portfolio, expected)
+
+
+def test_fixed_weight_returns_rejects_missing_columns():
+    returns = pd.DataFrame({"SPY": [0.01]})
+
+    with pytest.raises(ValueError, match="missing return columns"):
+        fixed_weight_returns(returns, {"SPY": 0.8, "DBMF": 0.2})
 
 
 def test_inverse_volatility_weights_are_long_only_and_sum_to_one():
