@@ -80,14 +80,22 @@ def heatmap_monthly(returns: pd.Series) -> go.Figure:
             colorscale="RdYlGn",
             zmid=0,
             text=text,
+            texttemplate="%{text}",
+            textfont={"color": "black", "size": 10},
             hovertemplate="%{y} %{x}: %{text}<extra></extra>",
         )
     )
     for row_idx, year in enumerate(tbl.index.astype(str)):
-        for col_idx, col in enumerate(tbl.columns):
-            cell_text = text[row_idx][col_idx]
-            if col == "YTD":
-                cell_text = f"<u>{cell_text}</u>"
-            fig.add_annotation(x=col, y=year, text=cell_text, showarrow=False, font={"color": "black"})
-    fig.update_layout(title="Monthly returns", **_layout_defaults())
+        cell_text = text[row_idx][-1]
+        fig.add_annotation(
+            x="YTD",
+            y=year,
+            text=f"<u>{cell_text}</u>",
+            showarrow=False,
+            font={"color": "black", "size": 10},
+        )
+
+    layout = _layout_defaults()
+    layout["height"] = max(layout["height"], 120 + 26 * len(tbl.index))
+    fig.update_layout(title="Monthly returns", **layout)
     return fig
