@@ -31,3 +31,16 @@ def risk_contributions(weights: pd.Series, cov: pd.DataFrame) -> pd.Series:
     mrc = cov_arr @ w / total          # marginal risk contribution
     rc = w * mrc                        # component risk contribution
     return pd.Series(rc, index=cov.index)
+
+
+def cvar(returns: pd.Series, q: float = 0.05) -> float:
+    """Conditional VaR: mean return in the worst ``q`` fraction of observations."""
+    if not 0 < q < 1:
+        raise ValueError("q must be between 0 and 1")
+
+    r = returns.dropna()
+    if r.empty:
+        return float("nan")
+
+    cutoff = r.quantile(q)
+    return float(r[r <= cutoff].mean())
