@@ -82,7 +82,7 @@ def run_backtest(
     *,
     rebalance: str | None = None,
     costs_bps: float = 1.0,
-    slippage_bps: float = 2.0,
+    slippage_bps: float | dict[str, float] = 2.0,
     funding: pd.DataFrame | None = None,
     funding_basis: Literal["held"] = "held",
     bars_per_year: int = 252,
@@ -98,6 +98,8 @@ def run_backtest(
         ``None`` rebalances every date in ``prices.index``.
     costs_bps : one-way commission, in basis points of notional traded.
     slippage_bps : one-way slippage, in basis points of notional traded.
+        Either a scalar (applied uniformly across symbols) or a ``dict``
+        mapping symbol → bps. Symbols absent from the dict get 0 bps.
     funding : optional wide DataFrame of funding rates (decimal fraction;
         e.g. 0.0001 = 1 bp). Index = funding timestamps (irregular, e.g.
         8h cadence). Columns = subset of ``prices.columns``.
@@ -132,8 +134,18 @@ def run_backtest(
     # Between rebalances held is constant, so this is only nonzero the day after
     # each rebalance (when new target kicks in).
     prev = held.shift(1).fillna(0.0)
-    turn = (held - prev).abs().sum(axis=1) / 2.0
-    cost = turn * (costs_bps + slippage_bps) / 10_000.0
+    delta = (held - prev).abs()
+    turn = delta.sum(axis=1) / 2.0
+    if isinstance(slippage_bps, dict):
+        # Per-symbol slippage: charge each symbol's one-way turnover at its own
+        # (commission + slip) bps; sum across symbols for the bar-level cost.
+        slip_vec = pd.Series(
+            {c: float(slippage_bps.get(c, 0.0)) for c in held.columns}
+        )
+        per_symbol_bps = slip_vec + costs_bps
+        cost = (delta / 2.0 * per_symbol_bps).sum(axis=1) / 10_000.0
+    else:
+        cost = turn * (costs_bps + slippage_bps) / 10_000.0
 
     # Funding (perp). Long pays positive rate; short receives. Cost per bar =
     # sum over symbols of held_weight * funding_rate at the bar containing the

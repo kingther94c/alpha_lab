@@ -116,3 +116,71 @@ def test_meta_carries_bars_per_year(simple_prices):
     res = run_backtest(signals, simple_prices, bars_per_year=525_600)
     assert res.meta["bars_per_year"] == 525_600
     assert res.meta["has_funding"] is False
+
+
+# --- Per-symbol slippage --------------------------------------------------
+
+def test_dict_slippage_uniform_matches_scalar(simple_prices):
+    """A dict slippage with the same value for every symbol must produce the
+    same cost as a scalar slippage of that value."""
+    # Build a signal with positive turnover: long on bar 0, flip to short on bar 2
+    signals = pd.DataFrame(
+        {"BTCUSDT": [1.0, 1.0, -1.0, -1.0], "ETHUSDT": [-1.0, -1.0, 1.0, 1.0]},
+        index=simple_prices.index,
+    )
+    scalar_res = run_backtest(signals, simple_prices, costs_bps=1.0, slippage_bps=2.0)
+    dict_res = run_backtest(
+        signals, simple_prices,
+        costs_bps=1.0,
+        slippage_bps={"BTCUSDT": 2.0, "ETHUSDT": 2.0},
+    )
+    pd.testing.assert_series_equal(scalar_res.costs, dict_res.costs, check_names=False)
+    pd.testing.assert_series_equal(scalar_res.returns, dict_res.returns, check_names=False)
+
+
+def test_dict_slippage_per_symbol_differs(simple_prices):
+    """Different per-symbol slip should produce a different cost than scalar."""
+    signals = pd.DataFrame(
+        {"BTCUSDT": [1.0, 1.0, -1.0, -1.0], "ETHUSDT": [-1.0, -1.0, 1.0, 1.0]},
+        index=simple_prices.index,
+    )
+    res_avg = run_backtest(signals, simple_prices, costs_bps=0.0, slippage_bps=3.0)
+    res_dict = run_backtest(
+        signals, simple_prices,
+        costs_bps=0.0,
+        slippage_bps={"BTCUSDT": 1.0, "ETHUSDT": 5.0},  # same mean=3 but different per symbol
+    )
+    # With symmetric turnover (both flip together) and matched mean slip, total
+    # cost happens to match — confirm that holds:
+    assert abs(float(res_avg.costs.sum()) - float(res_dict.costs.sum())) < 1e-12
+    # Now make turnover asymmetric — only BTC flips — and per-symbol slip should bite differently
+    asym = pd.DataFrame(
+        {"BTCUSDT": [1.0, 1.0, -1.0, -1.0], "ETHUSDT": [0.0, 0.0, 0.0, 0.0]},
+        index=simple_prices.index,
+    )
+    cost_btc_heavy = run_backtest(asym, simple_prices, costs_bps=0.0,
+                                  slippage_bps={"BTCUSDT": 10.0, "ETHUSDT": 0.0}).costs.sum()
+    cost_eth_heavy = run_backtest(asym, simple_prices, costs_bps=0.0,
+                                  slippage_bps={"BTCUSDT": 0.0, "ETHUSDT": 10.0}).costs.sum()
+    # BTC bears all the turnover → BTC-weighted slip drag > 0, ETH-weighted = 0.
+    assert float(cost_btc_heavy) > 0
+    assert float(cost_eth_heavy) == 0.0
+
+
+def test_dict_slippage_missing_symbol_defaults_to_zero(simple_prices):
+    signals = pd.DataFrame(
+        {"BTCUSDT": [1.0, 1.0, -1.0, -1.0], "ETHUSDT": [0.0, 0.0, 0.0, 0.0]},
+        index=simple_prices.index,
+    )
+    res = run_backtest(
+        signals, simple_prices, costs_bps=0.0,
+        slippage_bps={"BTCUSDT": 5.0},  # ETHUSDT missing
+    )
+    assert res.costs.sum() > 0  # BTC slip bites
+    # Symmetric strategy with no ETH turnover, but ETH slip missing — should
+    # behave identically to passing slip=0 for ETH explicitly.
+    res2 = run_backtest(
+        signals, simple_prices, costs_bps=0.0,
+        slippage_bps={"BTCUSDT": 5.0, "ETHUSDT": 0.0},
+    )
+    pd.testing.assert_series_equal(res.costs, res2.costs, check_names=False)
