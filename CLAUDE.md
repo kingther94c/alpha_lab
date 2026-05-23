@@ -6,6 +6,15 @@ Guidance for Claude when working in this repo.
 
 `alpha_lab` is a personal investment-research workbench spanning backtesting, cross-sectional factor research, exposure/regime/risk analysis, stats/ML, and occasional LLM experimentation. Asset coverage is ETFs, futures, FX, rates.
 
+## Environment
+
+- **Python**: 3.13 via conda env `py313`. Interpreter: `C:\Users\remoteuser\miniconda3\envs\py313\python.exe`.
+- Do NOT rely on `python` / `py` in PATH — they resolve to a dead Microsoft Store stub on this machine. Use the full interpreter path (or `conda activate py313`).
+- Editable install from repo root: `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pip install -e .`. Without this, `import alpha_lab` fails in notebooks and tests.
+- Run tests / scripts through the same interpreter, e.g. `& ...\py313\python.exe -m pytest -q`.
+
+See [AGENTS.md](AGENTS.md) for the full agent rule set.
+
 ## Philosophy: notebook-first, package-backed
 
 - **Notebooks are the primary entry point** for exploration. Don't fight the notebook workflow.

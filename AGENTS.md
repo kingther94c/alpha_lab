@@ -7,6 +7,13 @@ Instructions for any coding agent working in this repo.
 1. Read `README.md` and `CLAUDE.md` before planning changes.
 2. Skim `src/alpha_lab/` to see which submodule already owns the concept you're touching.
 
+## Environment
+
+- **Python**: 3.13 via conda env `py313`. Interpreter: `C:\Users\remoteuser\miniconda3\envs\py313\python.exe`.
+- **Do not rely on `python` / `py` in PATH** — the Microsoft Store `python.exe` stub is a dead alias. Always invoke the full interpreter path above (or activate the env first: `conda activate py313`).
+- **Editable install**: `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pip install -e .` from the repo root. Without this, `import alpha_lab` fails inside notebooks and tests.
+- **Run tests / scripts through the same interpreter**, e.g. `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pytest -q`.
+
 ## Rules
 
 - **Prefer extending existing modules** over creating new ones. Only add a new file when the concept clearly doesn't fit anywhere existing.
