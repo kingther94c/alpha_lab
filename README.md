@@ -83,3 +83,14 @@ ruff check .
 ## Philosophy
 
 Fast iteration first. Reusable helpers second. Reports optional later. Don't dump everything into notebooks forever — once logic is reused twice, move it into `src/alpha_lab/`.
+
+## Docs
+
+Durable knowledge lives under `docs/` — start at [`docs/README.md`](docs/README.md):
+
+- [Architecture](docs/architecture/alpha_lab_architecture.md) — directory ownership.
+- [Research artifact contracts](docs/contracts/research_artifacts.md) — shapes of universes, panels, weights, backtest results.
+- [Strategy research notebook template](notebooks/_templates/strategy_research_template.md) — start every new study from this outline.
+- [Decision record template](docs/research_decisions/template.md) — close every study with a verdict.
+- [Notebook → package backlog](docs/backlog/notebook_to_package_backlog.md) — running list of patterns to lift.
+- [Roadmap](docs/ROADMAP.md) — milestone plan for the package.
