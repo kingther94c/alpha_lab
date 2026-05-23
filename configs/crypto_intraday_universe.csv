@@ -1,0 +1,5 @@
+ticker,name,asset_class,market,symbol,interval,start_date
+BTCUSDT_perp,Binance USD-M perp BTCUSDT,crypto,perp,BTCUSDT,1m,2019-09-08
+ETHUSDT_perp,Binance USD-M perp ETHUSDT,crypto,perp,ETHUSDT,1m,2019-11-27
+BTCUSDT_spot,Binance spot BTCUSDT,crypto,spot,BTCUSDT,1m,2017-08-17
+ETHUSDT_spot,Binance spot ETHUSDT,crypto,spot,ETHUSDT,1m,2017-08-17

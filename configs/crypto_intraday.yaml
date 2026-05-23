@@ -1,0 +1,65 @@
+# Crypto intraday research config (BTCUSDT / ETHUSDT on Binance).
+#
+# Loaded via: alpha_lab.utils.config.load_config("crypto_intraday")
+#
+# Splits use half-open intervals [start, end). Times are UTC.
+
+archival_interval: "1m"   # archival cadence; resample as horizon research dictates
+
+splits:
+  # half-open [start, end). earliest train timestamp = first clean bar.
+  train_end:           "2024-07-01"
+  val_start:           "2024-07-01"
+  val_end:             "2025-01-01"
+  research_test_start: "2025-01-01"
+  research_test_end:   "2026-01-01"
+  pm_holdout_start:    "2026-01-01"
+  pm_holdout_end:      "2026-05-01"
+
+pm_holdout:
+  start: "2026-01-01"
+  end:   "2026-05-01"
+  allow: false   # discipline harness — NEVER unlock this engagement
+
+costs:
+  # Each scenario's slippage map is symbol -> bps/side. fee_bps_per_side is global.
+  # Headline tradability verdict relies on base/stress, never zero-cost.
+  zero:
+    fee_bps_per_side: 0.0
+    slippage_bps_per_side:
+      BTCUSDT: 0.0
+      ETHUSDT: 0.0
+    include_funding: false   # diagnostic only — funding=0
+  perp_base:
+    fee_bps_per_side: 5.0
+    slippage_bps_per_side:
+      BTCUSDT: 1.0
+      ETHUSDT: 1.5
+    include_funding: true
+  perp_stress:
+    fee_bps_per_side: 5.0
+    slippage_bps_per_side:
+      BTCUSDT: 3.0
+      ETHUSDT: 5.0
+    include_funding: true
+  spot_base:
+    fee_bps_per_side: 10.0
+    slippage_bps_per_side:
+      BTCUSDT: 2.0
+      ETHUSDT: 3.0
+    include_funding: false
+  spot_stress:
+    fee_bps_per_side: 10.0
+    slippage_bps_per_side:
+      BTCUSDT: 5.0
+      ETHUSDT: 7.5
+    include_funding: false
+
+# Funding cost is applied at actual 8h funding timestamps for positions
+# held across those timestamps. Funding-as-feature must use only past values.
+funding:
+  cadence_hours: 8
+  basis: "held"   # cost = held_notional * funding_rate at funding bar
+
+# Universe lives at configs/crypto_intraday_universe.csv
+universe_file: "crypto_intraday_universe.csv"
