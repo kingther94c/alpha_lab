@@ -214,6 +214,69 @@ All other P2 strategies rejected. Vol-regime overlay on `funding_momentum` HURT 
 
 LightGBM was the strongest gross learner but had 2× the turnover of linear models, paid the cost penalty.
 
+### Risk-adjusted metrics + average holding period (all phases, at perp_stress)
+
+`avg_hold` = mean over symbols of `(non-flat bars) / (weight-change events) × bar duration`. For continuous-weight strategies this lands at fractions of a bar (every bar is essentially a trade); for threshold / event-driven strategies it lands at the natural multi-bar holding horizon.
+
+#### P0 baselines (perp 1m, June 2024; perp_base costs — June was -7% BTC so BH Sharpes are negative)
+
+| strategy | avg_hold | Sharpe | Sortino | Calmar | MaxDD |
+|---|---:|---:|---:|---:|---:|
+| always_flat | — | NaN | NaN | NaN | 0.00 |
+| bh_btc | 360 h (15 d) | -2.47 | -3.15 | -3.36 | -0.19 |
+| bh_eth | 360 h | -2.42 | -3.06 | -4.17 | -0.17 |
+| equal_weight | 720 h | -2.57 | -3.29 | -3.88 | -0.17 |
+| random | 0.017 h (1 min) | -580 | -730 | -1.00 | -1.00 |
+
+#### P1 rule-based (perp 5m, Q1+Q2 2024, perp_stress)
+
+| strategy | avg_hold | Sharpe | Sortino | Calmar | MaxDD |
+|---|---:|---:|---:|---:|---:|
+| rsi_mr | 0.09 h (5 min) | -20.5 | -22.4 | -1.02 | -0.98 |
+| bollinger_mr | 0.09 h | -27.5 | -31.0 | -1.01 | -0.99 |
+| bollinger_breakout | 0.09 h | -24.8 | -20.8 | -1.03 | -0.97 |
+| distma_reversion | 0.11 h | -12.7 | -14.2 | -1.06 | -0.94 |
+| short_term_reversal | 0.10 h | -33.8 | -39.0 | -1.00 | -0.999 |
+| ma_crossover | 2.98 h | -5.1 | -7.0 | -1.23 | -0.76 |
+| macd_trend | 1.03 h | -13.9 | -19.8 | -1.02 | -0.98 |
+| donchian_breakout | 0.05 h | -28.4 | -18.7 | -1.08 | -0.92 |
+| volume_shock_continuation | 0.06 h | -15.9 | -8.6 | -1.15 | -0.84 |
+
+Holding periods of 3–11 minutes confirm the diagnosis: at 5m with continuous-weight signals, every bar is essentially a trade. Cost annihilation is mechanical.
+
+#### P2 strategies (perp 1h, Q1+Q2 2024, perp_stress)
+
+| strategy | avg_hold | Sharpe | Sortino | Calmar | MaxDD |
+|---|---:|---:|---:|---:|---:|
+| volume_shock_continuation_v2 | 0.62 h | -2.41 | -1.45 | -1.59 | -0.23 |
+| bollinger_mr_threshold | 1.26 h | -2.27 | -1.62 | -1.52 | -0.33 |
+| rsi_mr_threshold | 1.76 h | -1.43 | -0.74 | -1.69 | -0.17 |
+| **funding_contrarian** | **8.1 h** | **+1.12** | **+1.00** | **+2.01** | -0.16 |
+| **funding_momentum** | **2148 h (≈89 d)** | **+1.56** | **+1.98** | **+3.57** | -0.28 |
+| spread_z_pair_trade | 1.10 h | -5.08 | -6.98 | -1.68 | -0.30 |
+| btc_leads_eth | 0.50 h | -6.50 | -9.05 | -1.51 | -0.46 |
+| beta_residual_mr | 0.50 h | -5.24 | -6.31 | -1.64 | -0.35 |
+
+#### P3 ML (perp 1h walk-forward, perp_stress)
+
+| strategy | avg_hold | Sharpe | Sortino | Calmar | MaxDD |
+|---|---:|---:|---:|---:|---:|
+| logistic | 2.17 h | -1.86 | -1.36 | -1.47 | -0.31 |
+| ridge | 8.62 h | -1.47 | -1.31 | -1.59 | -0.27 |
+| lightgbm | 1.67 h | -3.16 | -2.61 | -1.37 | -0.45 |
+
+#### Bottom-line ranking across phases (perp_stress Sharpe)
+
+| rank | strategy | phase | avg_hold | Sharpe | Sortino | Calmar |
+|---:|---|---|---:|---:|---:|---:|
+| 1 | **funding_momentum** | P2 | 89 d | **+1.56** | +1.98 | +3.57 |
+| 2 | **funding_contrarian** | P2 | 8 h | **+1.12** | +1.00 | +2.01 |
+| 3 | rsi_mr_threshold | P2 | 1.8 h | -1.43 | -0.74 | -1.69 |
+| 4 | ridge | P3 | 8.6 h | -1.47 | -1.31 | -1.59 |
+| 5 | logistic | P3 | 2.2 h | -1.86 | -1.36 | -1.47 |
+
+Reading: only the two funding-based strategies have positive risk-adjusted metrics. `funding_momentum`'s Sortino (1.98) > Sharpe (1.56) means downside vol is meaningfully smaller than total vol — its losses are tamer than its wins in this sample. Sample-period reading; not a robust feature in isolation.
+
 ### BTC vs ETH attribution (`funding_momentum`)
 
 Both symbols contribute. ETH funding was more volatile in Q1+Q2 2024 (lower min, higher max); BTC funding was more persistently positive. Combined long bias generated the bulk of returns; BTC contributed ~60%, ETH ~40% by net P&L.
