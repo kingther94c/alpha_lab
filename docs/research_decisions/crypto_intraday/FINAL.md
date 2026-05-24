@@ -1,13 +1,45 @@
 # BTC/ETH Intraday Edge Research on Binance — PM Report
 
 **Engagement**: `crypto_intraday`
-**Period of work**: 2026-05-23
+**Period of work**: 2026-05-23 → 2026-05-24
 **Researcher**: Kelvin Chen
-**Report version**: 1.0 (P0+P1+P2+P3 complete; P4 = this document)
+**Report version**: 2.0 (P0-P4 v1 + P5 cross-regime / TOD / P&L control / ML-ensemble follow-up)
+
+> **v2 update — read this first**: the v1 primary candidate (`funding_momentum`) was tested in a single bull window. P5 ran it across 2022-Q1, 2023-H1, 2024-H1 and found it **breaks in the bear period** (Sharpe -3.31, net -44.6% in 2022-Q1). The revised primary candidate is **`funding_contrarian`**, which is the only strategy with positive Sharpe in every tested regime. Full v2 findings in [P5-regime-tod-ml-pnl.md](./P5-regime-tod-ml-pnl.md); a v2 executive summary follows below.
 
 ---
 
-## 1. Executive summary
+## 0. v2 executive summary (P5 follow-up)
+
+**Question revisited**: Same question, three regime windows: mild-bear (2022-Q1), strong-bull (2023-H1 was *labeled* chop but is actually bull recovery — BTC +84%), bull (2024-H1).
+
+**Revised verdict**: still **MONITOR**, but with material updates:
+
+1. **Primary candidate is now `funding_contrarian`** (Sharpe +0.73 / +2.16 / +1.12 across bear / "chop" / bull at perp_stress). It is the only single strategy positive in every regime tested, including the bear. `funding_momentum` is downgraded.
+
+2. **`funding_momentum` is regime-dependent** (Sharpe -3.31 / +1.75 / +1.56). The v1 result reflected a single bull regime. In the mild 2022-Q1 bear it lost -44.6% net.
+
+3. **Time-of-day exploitation** is real for `funding_contrarian`: US-hours (13-21 UTC) session_Sharpe is +2.05 / +1.48 / +2.68 across regimes; other sessions are mixed or negative. A US-hours-gated variant is the most promising next experiment but is not yet implemented as a backtested strategy.
+
+4. **P&L control on `funding_momentum`**: stop-loss is counterproductive; profit-take is neutral-to-bad; **`timeout_30d`** is the best variant (improves bull/chop Sharpe to +1.84/+1.82 without making bear meaningfully worse). But P&L control alone does NOT fix the bear problem — a regime filter is required.
+
+5. **ML signal ensemble re-tested with leave-one-regime-out CV**: rejected again. Logistic regression marginally positive on the bear-OOS regime (+0.65 Sharpe) but worse than `funding_contrarian` (+0.73) in every regime. LightGBM massively over-fits the small training set (-7 to -9 Sharpe on every OOS fold). Rule: ML must beat simple baselines in every regime → reject.
+
+6. **Regime-labeling caveat**: the user-requested `chop_2023H1` window is actually a strong bull (BTC +84% in 6 months). True chop validation is still pending. The test set is mild-bear + 2 bulls, not the intended bear/chop/bull triad.
+
+7. **Recommended P6 experiments** (before unlocking PM holdout):
+   - Add a true chop window (e.g. H2 2023 or H2 2024).
+   - Implement `funding_contrarian × US-hours` as a backtested strategy.
+   - Add a vol-regime / drawdown filter to `funding_momentum` to handle bear periods.
+   - Validate cross-symbol (extend beyond BTC + ETH).
+
+8. **PM holdout still untouched** (46 audit events across both engagements, 0 raises).
+
+The v1 sections below remain as-written for traceability — they document the analytical path that led to the revised verdict. The v2 conclusions in this section supersede v1's primary-candidate claim.
+
+---
+
+## 1. Executive summary (v1, retained for traceability)
 
 **Question**: Is there a tradable intraday edge in Binance BTCUSDT / ETHUSDT perp that survives realistic costs?
 
