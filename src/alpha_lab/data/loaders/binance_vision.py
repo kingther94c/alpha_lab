@@ -56,6 +56,22 @@ _OHLCV_OUT_COLS = [
 ]
 
 
+def _epoch_unit(int_series: pd.Series) -> str:
+    """Detect the epoch unit of integer Binance timestamps from magnitude.
+
+    Binance Vision switched some kline archives from milliseconds to microseconds
+    in 2025 (spot first; USD-M futures stayed ms longer), so the unit must be
+    inferred per file rather than assumed. For all realistic dates a millisecond
+    epoch is < 1e13, a microsecond epoch is in [1e13, 1e16), nanoseconds >= 1e16.
+    """
+    v = int(int_series.abs().max())
+    if v >= 10**16:
+        return "ns"
+    if v >= 10**13:
+        return "us"
+    return "ms"
+
+
 def _market_path(market: Market) -> str:
     if market == "spot":
         return "spot"
@@ -199,7 +215,7 @@ def parse_kline_zip(zip_path: Path) -> pd.DataFrame:
     for c in ("open", "high", "low", "close", "volume", "quote_volume",
               "taker_buy_base", "taker_buy_quote"):
         df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
+    df["open_time"] = pd.to_datetime(df["open_time"], unit=_epoch_unit(df["open_time"]), utc=True)
     df = df.set_index("open_time").sort_index()
     return df[_OHLCV_OUT_COLS]
 
@@ -223,7 +239,7 @@ def parse_funding_zip(zip_path: Path) -> pd.DataFrame:
         df["funding_interval_hours"], errors="coerce",
     ).fillna(8).astype("int64")
     df["last_funding_rate"] = pd.to_numeric(df["last_funding_rate"], errors="coerce").astype("float64")
-    df["calc_time"] = pd.to_datetime(df["calc_time"], unit="ms", utc=True)
+    df["calc_time"] = pd.to_datetime(df["calc_time"], unit=_epoch_unit(df["calc_time"]), utc=True)
     df = df.set_index("calc_time").sort_index()
     return df[["funding_interval_hours", "last_funding_rate"]]
 

@@ -52,7 +52,7 @@ Sources marked `internal prior / not externally verified` are my own assumptions
 | 20 | funding_adjusted_trend | internal prior | weight trend signals by sign of funding | close + funding | 1h+ | medium | medium | low | deferred | combine #12 with #16 |
 | 21 | oi_expansion | internal prior | rising OI + rising price = new longs entering | OI (Binance metrics) | 1h+ | medium | medium | low (lagged) | deferred | requires Binance Vision metrics endpoint (TODO loader extension) |
 | 22 | oi_contraction | internal prior | falling OI + price = position unwind | OI | 1h+ | medium | medium | low | deferred | mirror of #21 |
-| 23 | basis_premium | internal prior; CME literature on cash-and-carry (no specific cite) | spot–perp basis carries information about positioning | spot + perp close | 1h+ | low | low | low (lagged) | deferred | requires joint spot + perp load |
+| 23 | basis_premium | internal prior; CME literature on cash-and-carry (no specific cite) | spot–perp basis carries information about positioning | spot + perp close | 1h+ | low | low | low (lagged) | **BUILT → accept_monitoring (P6)** | market-neutral cash-and-carry: +15.7% net / −1.1% MaxDD, positive every regime incl. 2025 OOS; needed an ms/µs-timestamp loader fix |
 
 ## P2 — Cross-asset (deferred)
 
