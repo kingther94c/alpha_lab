@@ -9,10 +9,10 @@ Instructions for any coding agent working in this repo.
 
 ## Environment
 
-- **Python**: 3.13 via conda env `py313`. Interpreter: `C:\Users\remoteuser\miniconda3\envs\py313\python.exe`.
+- **Python**: 3.13 via conda env `py313`. Interpreter: `D:\conda\envs\py313\python.exe`.
 - **Do not rely on `python` / `py` in PATH** — the Microsoft Store `python.exe` stub is a dead alias. Always invoke the full interpreter path above (or activate the env first: `conda activate py313`).
-- **Editable install**: `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pip install -e .` from the repo root. Without this, `import alpha_lab` fails inside notebooks and tests.
-- **Run tests / scripts through the same interpreter**, e.g. `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pytest -q`.
+- **Editable install**: `& D:\conda\envs\py313\python.exe -m pip install -e .` from the repo root. Without this, `import alpha_lab` fails inside notebooks and tests.
+- **Run tests / scripts through the same interpreter**, e.g. `& D:\conda\envs\py313\python.exe -m pytest -q`.
 
 ## Rules
 
@@ -30,7 +30,16 @@ Instructions for any coding agent working in this repo.
 
 ## Agent skills
 
-Use repo-relevant skills deliberately:
+Use repo-relevant skills deliberately. **Start with the project's own skill suite** under
+`.claude/skills/` — its map, ordering, and authoring conventions live in the
+[`using-alpha-lab-skills`](.claude/skills/using-alpha-lab-skills/SKILL.md) standards skill. The agent
+layer is layered: *facts / mechanical rules* live in `CLAUDE.md` and here; *reusable procedures* live
+in skills; *ephemeral research knobs* live in notebook cells — keep each in one layer.
+
+- **Project research skills** (`.claude/skills/`): `idea-generation` turns a prompt or a stuck study
+  into ranked, mechanism-backed idea cards (anchored to real return sources). More are planned —
+  study scaffolding, leakage audit, factor IC, backtest — see the standards skill for the suite and
+  the pipeline ordering (ideate → study → audit → decide → lift).
 
 - **GitHub skills**: use when asked to inspect PRs/issues, fix failing CI, address review comments, or publish local changes. Keep the commit scope tight and never include secrets, private data, raw data, or unrelated notebook output churn.
 - **OpenAI docs skill**: use for OpenAI API / model / prompt-upgrade work. Rely on official OpenAI docs rather than remembered API details.

@@ -8,10 +8,10 @@ Guidance for Claude when working in this repo.
 
 ## Environment
 
-- **Python**: 3.13 via conda env `py313`. Interpreter: `C:\Users\remoteuser\miniconda3\envs\py313\python.exe`.
+- **Python**: 3.13 via conda env `py313`. Interpreter: `D:\conda\envs\py313\python.exe`.
 - Do NOT rely on `python` / `py` in PATH — they resolve to a dead Microsoft Store stub on this machine. Use the full interpreter path (or `conda activate py313`).
-- Editable install from repo root: `& C:\Users\remoteuser\miniconda3\envs\py313\python.exe -m pip install -e .`. Without this, `import alpha_lab` fails in notebooks and tests.
-- Run tests / scripts through the same interpreter, e.g. `& ...\py313\python.exe -m pytest -q`.
+- Editable install from repo root: `& D:\conda\envs\py313\python.exe -m pip install -e .`. Without this, `import alpha_lab` fails in notebooks and tests.
+- Run tests / scripts through the same interpreter, e.g. `& D:\conda\envs\py313\python.exe -m pytest -q`.
 
 See [AGENTS.md](AGENTS.md) for the full agent rule set.
 
