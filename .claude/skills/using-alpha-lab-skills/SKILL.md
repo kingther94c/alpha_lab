@@ -43,8 +43,8 @@ later step looks more interesting.
 1. **Ideate** → `idea-generation` produces ranked idea cards (what is worth testing).
 2. **Study** → scaffold and drive a notebook from `notebooks/_templates/strategy_research_template.md`
    *(planned skill: `running-a-study`)*.
-3. **Trust it** → audit the signal/notebook for leakage before believing any backtest
-   *(planned skill: `auditing-for-leakage`)*.
+3. **Trust it** → audit the signal/notebook for leakage before believing any backtest, via the
+   **`auditing-for-leakage`** skill.
 4. **Decide** → run the robustness checklist and write the decision record
    *(planned skill: `writing-a-decision-record`)*.
 5. **Lift** → move reusable logic from notebook to `src/alpha_lab/` *(planned skill: `lifting-to-package`)*.
@@ -66,7 +66,7 @@ capability per skill; selection is by description.
 |---|---|---|
 | `idea-generation` | **built** | Want new strategy/factor/signal ideas; stuck; expanding a research direction |
 | `running-a-study` | planned | Start a study: scaffold the template, wire loaders/contracts, drive to a verdict |
-| `auditing-for-leakage` | planned | Sanity-check a notebook/signal for lookahead, same-day execution, full-sample stats, survivorship |
+| `auditing-for-leakage` | **built** | Sanity-check a notebook/signal for lookahead, same-day execution, full-sample stats, survivorship |
 | `building-a-factor` | planned | Construct a factor score (winsorize/zscore/rank) leak-safely for IC analysis |
 | `computing-factor-ic` | planned | Standardized IC / rank-IC / quantile-bucket evaluation of a signal |
 | `running-a-backtest` | planned | Vectorized backtest with cost/slippage; thin wrapper over `backtest.vector` |
