@@ -24,11 +24,16 @@ def load_series(
 ) -> pd.DataFrame:
     """Download one or more FRED series and return a wide DataFrame.
 
+    Each code is fetched on its own request and the results are outer-joined on
+    the date index. The fredgraph.csv endpoint has no working comma-joined
+    multi-id mode (``id=A,B`` returns a malformed CSV), so per-series fetches are
+    the only reliable way to support more than one code.
+
     Parameters
     ----------
     codes : FRED series id(s), e.g. ``"DGS10"`` or ``["DGS10", "DGS2"]``.
     start, end : optional ISO date strings for filtering (applied client-side).
-    timeout : request timeout in seconds.
+    timeout : per-request timeout in seconds.
 
     Returns
     -------
@@ -37,26 +42,50 @@ def load_series(
     """
     if isinstance(codes, str):
         codes = [codes]
-    params = {"id": ",".join(codes)}
     headers = {}
     # Respect an API key if the user has one, but don't require it.
     if key := os.environ.get("FRED_API_KEY"):
         headers["X-API-Key"] = key
 
-    resp = httpx.get(_FRED_CSV, params=params, headers=headers, timeout=timeout)
-    resp.raise_for_status()
+    frames = []
+    for code in codes:
+        resp = httpx.get(_FRED_CSV, params={"id": code}, headers=headers, timeout=timeout)
+        resp.raise_for_status()
+        frames.append(_parse_fred_csv(resp.text, code))
 
-    df = pd.read_csv(StringIO(resp.text), na_values=["."])
-    date_col = "DATE" if "DATE" in df.columns else "observation_date"
-    df[date_col] = pd.to_datetime(df[date_col])
-    df = df.set_index(date_col)
-    df.index.name = None
+    df = _merge_fred_frames(frames)
 
     if start is not None:
         df = df.loc[pd.Timestamp(start):]
     if end is not None:
         df = df.loc[: pd.Timestamp(end)]
     return df.sort_index(axis=1)
+
+
+def _parse_fred_csv(text: str, code: str) -> pd.DataFrame:
+    """Parse one fredgraph.csv response into a single-column, date-indexed frame.
+
+    The endpoint returns ``observation_date,<ID>`` (older dumps used ``DATE``).
+    The lone data column is renamed to ``code`` so callers always get exactly one
+    column per requested id, and ``.`` placeholders are coerced to NaN.
+    """
+    df = pd.read_csv(StringIO(text), na_values=["."])
+    date_col = "DATE" if "DATE" in df.columns else "observation_date"
+    df[date_col] = pd.to_datetime(df[date_col])
+    df = df.set_index(date_col)
+    df.index.name = None
+    df.columns = [code]
+    return df
+
+
+def _merge_fred_frames(frames: list[pd.DataFrame]) -> pd.DataFrame:
+    """Outer-join per-series frames on the date index, chronologically sorted.
+
+    Dates present in only some series are filled with NaN, preserving the wide
+    one-column-per-code return contract.
+    """
+    merged = pd.concat(frames, axis=1, join="outer", sort=False)
+    return merged.sort_index()
 
 
 def discount_rate_to_daily_rate(
