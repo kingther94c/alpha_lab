@@ -65,7 +65,9 @@ implementation churns the four legs and pays it all back in fees (our first atte
 
 ## 5. Headline performance — net of stress costs
 
-Daily, `thr=0`, 7-day funding smoothing, BTC+ETH, perp+spot **stress** costs:
+Daily, `thr=0`, 7-day funding smoothing, BTC+ETH, perp+spot **stress** costs. These charge trading
+frictions + perp funding but are **gross of cash financing** — §6b corrects this and is the single most
+important caveat in this record:
 
 | metric | value |
 |---|---|
@@ -99,6 +101,30 @@ The price legs contribute **+0.10% over four years** → the book is genuinely *
 return *is* the funding carry minus cost. This is the single most important diagnostic: it confirms the
 PnL is not a disguised directional bet (unlike v1's `funding_momentum`).
 
+## 6b. Cost of cash (financing) — the decisive caveat
+
+§5/§6 charge trading frictions + perp funding but **not the cost of the capital** in the long-spot leg.
+A cash-and-carry's true economics are **funding − financing**: buying spot consumes cash with a
+risk-free opportunity cost (3-month T-bills rose ~0 → 5%+ across 2022–2025). Charging that (FRED
+DGS3MO on the held long-spot notional ≈ 0.46) materially changes the result:
+
+| scenario | 2022 | 2023 | 2024 | 2025 | net (4y) | Sharpe |
+|---|---|---|---|---|---|---|
+| A — as in §5 (no financing) | +0.6% | +3.7% | +6.1% | +2.1% | **+15.7%** | 3.75 |
+| B — full financing on spot | −0.2% | +1.1% | +3.6% | +0.0% | **+6.9%** | 1.72 |
+| C — 50% recaptured (yield collateral) | +0.2% | +2.4% | +4.8% | +1.1% | **+11.2%** | 2.73 |
+
+Financing drag ≈ **7.9% over four years (~2%/yr)** vs funding received +16.8% and trading cost 2.3%.
+
+**Interpretation.** The real edge is the **funding-minus-financing spread** — the pure crypto basis
+premium — clearly positive only when leverage demand pushes funding above rates (2023–2024). In the
+low-funding bear/chop (2022, 2025) it is ~break-even under full financing (B), turning modestly
+positive only if financing is recaptured by holding collateral in yield-bearing form (C: spot posted as
+perp margin, quote collateral in T-bill-backed stablecoins / MMF). A capital-efficient desk sits
+between B and C, closer to C. The book stays **market-neutral and net-positive**, but §5's "positive
+every regime" holds only under realistic collateral efficiency; under full financing, 2022 and 2025 are
+break-even.
+
 ## 7. Robustness
 
 All variations stay net-positive (these are perturbations of **one** mechanism, not independent bets):
@@ -121,8 +147,12 @@ All variations stay net-positive (these are perturbations of **one** mechanism, 
 
 - **Carry compression**: the yield tracks the funding environment (richest in 2024, thinnest in the
   2022 bear). If funding structurally trends to zero, the edge shrinks. Monitor realized funding.
-- **Modest absolute return** (~3.7%/yr). The high Sharpe is a low-vol artifact of neutrality — size
-  with leverage only with explicit margin/liquidation risk budgeting.
+- **Modest absolute return** — and **~2%/yr after financing** (§6b), not 3.7%. The high Sharpe is a
+  low-vol artifact of neutrality; size with leverage only with explicit margin/liquidation budgeting.
+- **Financing dependence**: the edge is the funding−financing spread, so it shrinks (toward break-even)
+  whenever USD rates approach the funding yield — the 2022 bear and the 2025 chop are exactly those
+  windows. This is a rate/spread dependence (still market-neutral), not the price-direction dependence
+  that killed v1.
 - **Operational realism not fully modeled**: perp margin & liquidation if the basis gaps, spot
   custody, real fills on unwinds during stress, and exchange/counterparty risk. The cost model is
   conservative on fees but does not model stressed-unwind slippage.
@@ -131,12 +161,14 @@ All variations stay net-positive (these are perturbations of **one** mechanism, 
 
 ## 9. Decision
 
-**Status: `accept_monitoring`.** This is the first market-neutral, cost-surviving, leak-free,
-all-regime-positive strategy in the engagement — a genuine edge, validated on a true bear and the 2025
-OOS. It is *not* `accept` because the absolute return is modest and operational/liquidation realism is
-unmodeled. Monitor: realized funding yield, basis behavior in stress, and live execution cost vs the
-2.3% backtested drag. Kill switch: net carry (funding − cost) below 0 over a trailing quarter, or a
-margin/liquidation event on the perp leg.
+**Status: `accept_monitoring`.** The first market-neutral, leak-free crypto edge in the engagement —
+validated on a true bear and the 2025 OOS. But the honest return is the **funding − financing spread**
+(§6b): **~+7% (full financing) to ~+11% (realistic collateral) over four years**, not the +15.7%
+gross-of-financing headline — and it is clearly positive only when funding exceeds rates (2023–2024).
+It is *not* `accept` because the spread-adjusted return is modest, thin in low-funding regimes, and
+operational/liquidation realism is unmodeled. **Monitor** the live **funding − financing spread** (not
+funding alone), basis behavior in stress, and collateral-yield capture. **Kill** if the trailing-quarter
+funding − financing spread ≤ 0 net of trading cost, or on a perp-leg margin/liquidation event.
 
 ## 10. Next steps
 
