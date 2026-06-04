@@ -204,6 +204,11 @@ All values are fractions (e.g. `Sharpe = 0.84`, `MaxDD = -0.18`,
   not the same artifact as one with 5,000 daily observations.
 - Net-of-cost is the headline; gross is a diagnostic. Don't quote gross
   Sharpe without saying so.
+- **"Net" includes the cost of cash.** For any capital-consuming or leveraged
+  strategy (long/short, futures/perp basis, cash-and-carry, levered overlay), net
+  must also subtract financing — the risk-free rate (3M T-bill / SOFR) on the
+  deployed/borrowed capital — not only commissions, slippage, and funding.
+  Otherwise the headline overstates the edge (see `research_decisions/crypto_intraday/P6` §6b).
 - Confidence intervals / t-stats for overlapping-return strategies need
   Newey-West (todo: `stats/tests.py`). Until then, report `NPeriods` honestly
   and call out the overlap.

@@ -57,7 +57,9 @@ backtested best," say so and route to `reject` or `park`.
   vol-target), capping rules, leverage cap, rebalance frequency, turnover
   buffer.
 - **Costs:** commission_bps, slippage_bps used. Whether they are
-  conservative or "typical."
+  conservative or "typical." **Cost of cash:** for capital-consuming or leveraged
+  strategies, also state the financing rate charged (risk-free on deployed capital);
+  "net" must include it, not just commissions / slippage / funding.
 - **Benchmark:** the comparison series. Choosing the wrong benchmark
   (e.g. SPY for a global L/S) is the most common way to mis-decide.
 
@@ -103,6 +105,7 @@ Tick every box you checked. Honesty > completeness.
 - [ ] Survivorship check — universe documented and pre-frozen.
 - [ ] Same-day signal/execution check — weights are lagged.
 - [ ] Cost sweep — break-even cost > assumed cost with comfortable margin.
+- [ ] Cost of cash charged — financing on deployed/leveraged capital netted; edge beats the risk-free hurdle.
 - [ ] Capacity estimate — implied trade size vs. ADV.
 
 ## 8. Failure modes

@@ -158,6 +158,12 @@ Markdown: which benchmark, why. Costs should be **conservative** —
 `backtest.yaml` defaults are a fine starting point; be willing to double
 them in a sensitivity check.
 
+**Cost of cash.** If the strategy ties up capital or uses leverage (long/short,
+futures/perp basis, cash-and-carry, levered overlay), also charge the **financing
+cost** — the risk-free rate (3M T-bill via `fred`) on the deployed/borrowed capital —
+and judge the edge against that hurdle. Commissions + slippage + funding are not the
+whole cost; omitting financing overstated the P6 carry by ~half.
+
 ---
 
 ## Cell 9 — Backtest (code)
