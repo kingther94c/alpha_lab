@@ -1,88 +1,79 @@
 """State/control bridge between the UI and a running bot.
 
-The UI talks to the bot through files (``config.json`` it writes, ``status.json`` the bot writes,
-the equity/rebalance CSVs) plus process control via the package CLI — so the UI never imports the
-trading code directly. Paths come from ``core.config`` (per-bot run dir).
+The UI reads a bot's state from its SQLite store (``core.store.Store``) and controls the process
+via the package CLI — so the UI never imports the trading code (ccxt / alpha_lab) directly. Every
+function takes a ``bot`` name (default ``config.DEFAULT_BOT``) so the cockpit can manage several
+bots side by side. Defaults come from the bot's YAML via ``registry.default_config``.
 """
 from __future__ import annotations
 
 import datetime as dt
-import json
 import os
 import subprocess
 import sys
 
 import pandas as pd
 
-from quant_bot_manager.core import config
+from quant_bot_manager.core import config, registry
+from quant_bot_manager.core.store import Store
 
-BOT = config.DEFAULT_BOT
-P = config.paths(BOT)
 PYEXE = sys.executable
 _ENV = {**os.environ, "PYTHONPATH": str(config.ROOT / "src") + os.pathsep + os.environ.get("PYTHONPATH", "")}
 
 
-def read_equity() -> pd.DataFrame:
-    if not P["equity"].exists():
-        return pd.DataFrame(columns=["ts", "total_equity", "fut_equity", "spot_equity"])
-    df = pd.read_csv(P["equity"])
-    df["ts"] = pd.to_datetime(df["ts"])
-    return df
+def _store(bot: str) -> Store:
+    return Store(bot)
 
 
-def read_rebalances() -> pd.DataFrame:
-    return pd.read_csv(P["rebalance"]) if P["rebalance"].exists() else pd.DataFrame()
+# -- reads ----------------------------------------------------------------
+def read_equity(bot: str = config.DEFAULT_BOT) -> pd.DataFrame:
+    return _store(bot).read_equity_df()
 
 
-def read_status() -> dict:
-    if not P["status"].exists():
-        return {}
-    try:
-        return json.loads(P["status"].read_text())
-    except Exception:
-        return {}
+def read_rebalances(bot: str = config.DEFAULT_BOT) -> pd.DataFrame:
+    return _store(bot).read_rebalances_df()
 
 
-def read_config() -> dict:
-    cfg = dict(config.DEFAULT_CONFIG)
-    if P["config"].exists():
-        try:
-            cfg.update(json.loads(P["config"].read_text()))
-        except Exception:
-            pass
+def read_status(bot: str = config.DEFAULT_BOT) -> dict:
+    return _store(bot).read_status()
+
+
+def read_config(bot: str = config.DEFAULT_BOT) -> dict:
+    """Bot's effective config: YAML defaults overlaid with any live store overrides."""
+    cfg = registry.default_config(bot).to_dict()
+    cfg.update(_store(bot).read_config())
     return cfg
 
 
-def write_config(updates: dict) -> None:
-    cfg = read_config()
-    cfg.update(updates)
-    P["config"].write_text(json.dumps(cfg, indent=2))
+def write_config(updates: dict, bot: str = config.DEFAULT_BOT) -> None:
+    _store(bot).write_config(updates)
 
 
-def is_running() -> bool:
-    s = read_status()
+def is_running(bot: str = config.DEFAULT_BOT) -> bool:
+    s = read_status(bot)
     hb = s.get("last_heartbeat")
     if not hb:
         return False
     try:
         age = (dt.datetime.now(dt.UTC) - dt.datetime.fromisoformat(hb)).total_seconds()
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
     interval = float((s.get("config") or {}).get("interval_min", 15))
     return age < max(interval * 60 * 2.5, 180)
 
 
+# -- process / control ----------------------------------------------------
 def _cli(*cmd):
     return [PYEXE, "-m", "quant_bot_manager.cli", *cmd]
 
 
-def start_bot(cfg: dict) -> str:
-    write_config({**cfg, "paused": False})
+def start_bot(cfg: dict, bot: str = config.DEFAULT_BOT) -> str:
+    write_config({**cfg, "paused": False}, bot)
     flags = 0
     if os.name == "nt":
         flags = 0x00000008 | subprocess.CREATE_NEW_PROCESS_GROUP   # DETACHED_PROCESS
     subprocess.Popen(
-        _cli("run", "--bot", BOT, "--mode", "demo", "--capital", str(cfg["capital"]),
+        _cli("run", "--bot", bot, "--mode", "demo", "--capital", str(cfg["capital"]),
              "--method", cfg["method"], "--max-gross", str(cfg["max_gross"]),
              "--interval-min", str(cfg["interval_min"])),
         cwd=str(config.ROOT), env=_ENV, creationflags=flags,
@@ -90,8 +81,8 @@ def start_bot(cfg: dict) -> str:
     return "start requested"
 
 
-def stop_bot() -> str:
-    pid = read_status().get("pid")
+def stop_bot(bot: str = config.DEFAULT_BOT) -> str:
+    pid = read_status(bot).get("pid")
     if not pid:
         return "no running pid in status"
     if os.name == "nt":
@@ -105,12 +96,22 @@ def stop_bot() -> str:
     return f"stopped pid {pid}"
 
 
-def set_paused(paused: bool) -> None:
-    write_config({"paused": bool(paused)})
+def set_paused(paused: bool, bot: str = config.DEFAULT_BOT) -> None:
+    write_config({"paused": bool(paused)}, bot)
 
 
-def manual_rebalance(capital: float, method: str) -> str:
+def set_halt(halt: bool, bot: str = config.DEFAULT_BOT) -> None:
+    """Hard manual kill-switch — the running bot stops placing orders next cycle (keeps marking)."""
+    write_config({"halt": bool(halt)}, bot)
+
+
+def clear_auto_halt(bot: str = config.DEFAULT_BOT) -> None:
+    """Release a latched drawdown auto-halt so trading can resume."""
+    _store(bot).set_auto_halted(False)
+
+
+def manual_rebalance(capital: float, method: str, bot: str = config.DEFAULT_BOT) -> str:
     r = subprocess.run(
-        _cli("rebalance", "--bot", BOT, "--mode", "demo", "--capital", str(capital), "--method", method),
+        _cli("rebalance", "--bot", bot, "--mode", "demo", "--capital", str(capital), "--method", method),
         cwd=str(config.ROOT), env=_ENV, capture_output=True, text=True, timeout=240)
     return (r.stdout or "") + (r.stderr or "")

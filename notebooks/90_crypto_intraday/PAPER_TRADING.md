@@ -8,12 +8,21 @@ The strategy (research) lives in `alpha_lab`; the **execution engine now lives i
 src/quant_bot_manager/
   strategies/p7_crypto_book.py  # live target weights (wraps alpha_lab.backtest.crypto_book)
   brokers/binance.py            # spot + USD-M futures: demo / testnet / live
-  core/{bot,runner,config}.py   # Bot, the loop/one-shot, paths
-  cli.py                        # entrypoint
-  ui/app.py                     # Streamlit cockpit
+  core/bot.py                   # Bot value object (strategy + broker + default config)
+  core/registry.py              # assemble bots from configs/bots/*.yaml (+ strategy/feed/broker plugins)
+  core/protocols.py             # Strategy / Feed / Broker plugin contracts
+  core/schema.py                # BotConfig — typed, validated config (+ risk limits)
+  core/store.py                 # SQLite per-bot state store (equity / rebalances / kv)
+  core/risk.py                  # gross cap + drawdown kill-switch
+  core/runner.py                # the loop / one-shot / dry plan
+  core/config.py                # paths, defaults, env
+  cli.py                        # entrypoint (bots / plan / rebalance / run)
+  ui/app.py                     # Streamlit cockpit (bot selector + kill-switch)
+configs/bots/p7_crypto_book.yaml  # declarative bot definition (strategy/feed/broker/default_config)
 ```
-Per-bot runtime artifacts: `data/results/bots/p7_crypto_book/` (`equity_log.csv`,
-`rebalance_log.csv`, `status.json`, `config.json`, `state.json`).
+Per-bot runtime state: `data/results/bots/<bot>/bot.db` (SQLite, WAL). On first run the store
+**imports any legacy `equity_log.csv` / `rebalance_log.csv` / `*.json`** so pre-SQLite history
+survives, then those flat files are ignored.
 
 > Run from the repo root with the package importable (`pip install -e .`, or `PYTHONPATH=src`).
 
@@ -27,18 +36,30 @@ BINANCE_DEMO_SECRET=...
 
 ## Commands
 ```bash
+# list defined bots:
+python -m quant_bot_manager.cli bots
 # dry order plan (no auth):
-python -m quant_bot_manager.cli plan --capital 10000
+python -m quant_bot_manager.cli plan --bot p7_crypto_book --capital 10000
 # one-shot rebalance on demo:
 python -m quant_bot_manager.cli rebalance --mode demo --capital 10000
 # continuous mock-trading process (mark-to-market + daily rebalance on live signals):
 python -m quant_bot_manager.cli run --mode demo --interval-min 15 --capital 10000
-# UI cockpit (monitor + control, incl. start/stop/pause/rebalance):
+# UI cockpit (monitor + control, incl. start/stop/pause/rebalance/kill-switch):
 streamlit run src/quant_bot_manager/ui/app.py     # -> http://localhost:8501
 ```
 
+## Risk / kill-switch
+- **Gross cap** (`max_gross`): a rebalance whose gross exposure exceeds the cap is skipped.
+- **Drawdown auto-halt** (`max_drawdown_pct`): if mark-to-market equity falls this far below its
+  peak, trading **latches off** (keeps marking). Clear it in the UI (*Clear drawdown auto-halt*)
+  or `store.set_auto_halted(False)`.
+- **Manual halt** (`halt`): hard kill-switch from the UI (*HALT trading now*) — stops new orders.
+- **Pause** (`paused`): soft stop — keeps marking-to-market, places no orders.
+All four live in the bot's `BotConfig`; the UI writes them to the store and the running bot reads
+them each cycle.
+
 ## Monitor / stop
-- Equity / trades / status: `data/results/bots/p7_crypto_book/`
+- Equity / trades / status / risk: `data/results/bots/<bot>/bot.db` (or the UI Monitor tab).
 - Stop: UI **Stop** button, or kill the `quant_bot_manager.cli run` process.
 
 ## 24/7 persistence (survives logoff/reboot)

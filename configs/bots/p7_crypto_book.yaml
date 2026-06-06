@@ -1,0 +1,17 @@
+# Bot definition (Option C) — declarative wiring of a tradable bot.
+# The registry (quant_bot_manager.core.registry) maps these names to implementations:
+#   strategy -> STRATEGIES, feed -> FEEDS, broker -> BROKERS.
+# default_config is validated by quant_bot_manager.core.schema.BotConfig.
+name: p7_crypto_book
+strategy: p7_crypto_book          # 5-sleeve crypto book (alpha_lab.backtest.crypto_book)
+feed: live_binance               # live Binance daily klines/funding + yfinance HYG, leak-safe
+broker: binance                  # spot + USD-M futures via ccxt
+
+default_config:
+  capital: 10000.0
+  method: equal_capital          # equal_capital | risk_budget
+  max_gross: 2.0                 # hard gross cap (x capital)
+  interval_min: 15.0             # mark / rebalance cadence (minutes)
+  max_drawdown_pct: 0.20         # kill-switch: latch-halt if equity falls 20% below peak
+  paused: false
+  halt: false

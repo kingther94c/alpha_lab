@@ -1,6 +1,8 @@
-"""Bot = a strategy (→ target weights) bound to a broker (execution venue).
+"""Bot = a strategy (-> target weights) bound to a broker (execution venue), plus its default config.
 
-The registry lets the manager/UI run several bots by name. Today there is one: the P7 crypto book.
+This is just the value object. Assembly from a YAML definition (which strategy / feed / broker /
+defaults) lives in ``core.registry`` so this module stays import-light (no ccxt / alpha_lab pulled
+in until a bot is actually built).
 """
 from __future__ import annotations
 
@@ -8,20 +10,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from quant_bot_manager.brokers.base import Broker
-from quant_bot_manager.brokers.binance import BinanceBroker
-from quant_bot_manager.strategies import p7_crypto_book
-
-BOTS = ["p7_crypto_book"]
+from quant_bot_manager.core.schema import BotConfig
 
 
 @dataclass
 class Bot:
     name: str
-    strategy: Callable          # method:str -> (targets: Series, asof, last_px: dict)
+    strategy: Callable                  # method:str -> (targets: Series, asof, last_px: dict)
     broker: Broker
-
-
-def get_bot(name: str = "p7_crypto_book", mode: str = "demo") -> Bot:
-    if name in ("p7", "p7_crypto_book"):
-        return Bot("p7_crypto_book", p7_crypto_book.latest_targets, BinanceBroker(mode))
-    raise ValueError(f"unknown bot {name!r}; known: {BOTS}")
+    default_config: BotConfig | None = None

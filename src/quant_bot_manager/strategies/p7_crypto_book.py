@@ -55,9 +55,14 @@ def build_live_bookdata(lookback_days: int = 420) -> cb.BookData:
                        rf_source="fallback", macro_source="yfinance HYG (live)")
 
 
-def latest_targets(method: str = "equal_capital"):
-    """Return (target_weights: Series, asof: Timestamp, last_px: dict) for execution today."""
-    bd = build_live_bookdata()
+def latest_targets(method: str = "equal_capital", *, feed=build_live_bookdata):
+    """Return (target_weights: Series, asof: Timestamp, last_px: dict) for execution today.
+
+    Satisfies the ``protocols.Strategy`` shape ``(method) -> (targets, asof, last_px)``. ``feed``
+    is the injectable ``protocols.Feed`` (defaults to the live Binance loader above); the registry
+    binds a named feed here so the same signal logic can run off live or replay data.
+    """
+    bd = feed()
     tgt = cb.latest_target_weights(bd, method=method)
     last_px = {**{lg: float(bd.spot_close[lg].iloc[-1]) for lg in SPOT_CCXT if lg in bd.spot_close},
                **{lg: float(bd.perp_close[lg].iloc[-1]) for lg in PERP_CCXT if lg in bd.perp_close}}
