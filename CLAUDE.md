@@ -6,6 +6,13 @@ Guidance for Claude when working in this repo.
 
 `alpha_lab` is a personal investment-research workbench spanning backtesting, cross-sectional factor research, exposure/regime/risk analysis, stats/ML, and occasional LLM experimentation. Asset coverage is ETFs, futures, FX, rates.
 
+The project has **two legs**:
+
+- **Research — `src/alpha_lab/`** — *finds* edges (data, features, backtests, strategies). Notebook-first.
+- **Execution — `src/quant_bot_manager/`** — *runs* edges as live/paper trading bots (brokers, runner, CLI) and monitors/controls them via a Streamlit cockpit.
+
+The handoff is a **strategy's target-weight function**: research produces it (e.g. `alpha_lab.backtest.crypto_book`), a `quant_bot_manager` *strategy* adapts it to live data, and a *bot* (strategy + broker) trades it. Keep the legs decoupled — **execution imports research, never the reverse.**
+
 ## Environment
 
 - **Python**: 3.13 via conda env `py313`. Interpreter: `D:\conda\envs\py313\python.exe`.
@@ -21,6 +28,7 @@ See [AGENTS.md](AGENTS.md) for the full agent rule set.
 - **Reusable logic belongs in `src/alpha_lab/`.** Once a function is copy-pasted into a second notebook, lift it into the package.
 - **Keep notebooks thin.** Import from the package; don't hide important logic inside ipynb JSON forever.
 - **Don't overengineer.** This is a solo research repo, not a production platform.
+- **Execution is package-first, not notebook-first.** Trading-bot code lives in `src/quant_bot_manager/`, never in notebooks. It still favors small/pure/typed functions and "don't overengineer", but it carries real-money safety gates (see AGENTS.md).
 
 ## Where reusable logic goes
 
@@ -38,6 +46,16 @@ See [AGENTS.md](AGENTS.md) for the full agent rule set.
 | Chart or report templates                        | `src/alpha_lab/reporting/`          |
 
 Prefer **small, pure, typed functions** with short docstrings. Avoid giant `helpers.py`-style dumping grounds.
+
+**Execution leg (`src/quant_bot_manager/`)** — where live/paper trading code goes:
+
+| If it is…                                          | Put it in…                            |
+|----------------------------------------------------|---------------------------------------|
+| Live strategy adapter (research → target weights)  | `src/quant_bot_manager/strategies/`   |
+| Exchange/broker integration (orders, positions)    | `src/quant_bot_manager/brokers/`      |
+| Bot definition, runner loop, config/paths          | `src/quant_bot_manager/core/`         |
+| Monitoring / control UI                            | `src/quant_bot_manager/ui/`           |
+| CLI entrypoint (`run` / `rebalance` / `plan`)       | `src/quant_bot_manager/cli.py`        |
 
 ## Configs vs notebook parameters
 

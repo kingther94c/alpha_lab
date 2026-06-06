@@ -5,7 +5,7 @@ Instructions for any coding agent working in this repo.
 ## First steps
 
 1. Read `README.md` and `CLAUDE.md` before planning changes.
-2. Skim `src/alpha_lab/` to see which submodule already owns the concept you're touching.
+2. Skim `src/alpha_lab/` (research leg) and `src/quant_bot_manager/` (execution leg) to see which leg/submodule already owns the concept you're touching.
 
 ## Environment
 
@@ -17,7 +17,7 @@ Instructions for any coding agent working in this repo.
 ## Rules
 
 - **Prefer extending existing modules** over creating new ones. Only add a new file when the concept clearly doesn't fit anywhere existing.
-- **Reusable logic must live in `src/alpha_lab/`.** Do not leave reusable code trapped inside notebooks.
+- **Reusable logic must live in the right leg.** Research code → `src/alpha_lab/`; live/paper **execution** code (brokers, runner, bots, CLI, UI) → `src/quant_bot_manager/`. **Execution may import research; research must never import execution.** Don't leave reusable code trapped in notebooks.
 - **Do not create a `helpers.py` / `utils.py` grab-bag.** Use the existing submodules (`utils/`, `analytics/`, `features/`, etc.).
 - **Never modify files under `data/raw/`.** Treat raw data as read-only.
 - **Never commit** secrets, `.env`, or anything under `data/private/`.
@@ -25,6 +25,7 @@ Instructions for any coding agent working in this repo.
 - **Avoid future information in backtests and signals.** Signals, weights, filters, normalizers, model fits, and risk estimates must use only data available at the decision timestamp. If a notebook intentionally uses forward returns or full-sample statistics to study a relationship, label it explicitly as research/diagnostic and do not present it as tradable performance.
 - **Trade after signal formation.** For reusable backtests, lag target weights or otherwise make the execution timing explicit. Do not let same-close signals earn same-close returns unless the notebook clearly documents that this is a non-tradable diagnostic.
 - **Account for the cost of cash (financing).** A backtest's "net" must subtract the financing cost of the capital it consumes — not only commissions, slippage, and funding. Any strategy that ties up cash or uses leverage (long/short, futures/perp basis, cash-and-carry, levered overlays) must charge the risk-free rate (3M T-bill via the `fred` loader, or SOFR) on the deployed/borrowed capital and judge the edge against that hurdle. Omitting it overstates returns — the P6 spot-perp carry looked like +15.7% but was roughly half that after financing.
+- **Never start real-money trading autonomously.** Live execution is hard-gated: it requires the user's live API keys, `CONFIRM_LIVE=YES`, and an explicit `--i-understand-live`. Default to `demo` (mock funds); paper-trade first. Never place live orders, fabricate or hunt for API keys, or weaken these gates without an explicit in-context user instruction. A key whose origin/permissions look like real money (e.g. binance.com vs demo.binance.com) must be flagged, not used.
 - **Keep functions small and pure** where practical. Add docstrings on public functions. Type annotations where they help.
 - **Don't overengineer.** No config systems, plugin registries, or abstract base classes unless justified by real reuse.
 - **Backtrader is optional.** Don't centralize the design around any single backtest framework.

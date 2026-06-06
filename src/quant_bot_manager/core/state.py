@@ -1,71 +1,65 @@
-"""State/control bridge between the UI and the running mock-trading bot.
+"""State/control bridge between the UI and a running bot.
 
-The UI talks to the bot purely through files (``bot_config.json`` it writes, ``bot_status.json`` the
-bot writes) plus process control — so the UI never imports the trading code. This keeps the cockpit
-decoupled from the runner/broker (which still live in notebooks/ pending the execution refactor).
+The UI talks to the bot through files (``config.json`` it writes, ``status.json`` the bot writes,
+the equity/rebalance CSVs) plus process control via the package CLI — so the UI never imports the
+trading code directly. Paths come from ``core.config`` (per-bot run dir).
 """
 from __future__ import annotations
+
 import datetime as dt
 import json
 import os
 import subprocess
 import sys
-from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[3]                      # .../src/quant_bot_manager/core/state.py -> repo root
-DATA = ROOT / "data" / "results" / "crypto_v3_multi"
-EQLOG, REBLOG = DATA / "mock_equity_log.csv", DATA / "mock_rebalance_log.csv"
-CONFIG, STATUS = DATA / "bot_config.json", DATA / "bot_status.json"
-LOOP = ROOT / "notebooks" / "90_crypto_intraday" / "mock_trader_loop.py"
-ONESHOT = ROOT / "notebooks" / "90_crypto_intraday" / "binance_paper_trade.py"
-PYEXE = sys.executable
+from quant_bot_manager.core import config
 
-DEFAULT_CONFIG = {"capital": 10000.0, "method": "equal_capital", "max_gross": 2.0,
-                  "interval_min": 15.0, "paused": False}
+BOT = config.DEFAULT_BOT
+P = config.paths(BOT)
+PYEXE = sys.executable
+_ENV = {**os.environ, "PYTHONPATH": str(config.ROOT / "src") + os.pathsep + os.environ.get("PYTHONPATH", "")}
 
 
 def read_equity() -> pd.DataFrame:
-    if not EQLOG.exists():
+    if not P["equity"].exists():
         return pd.DataFrame(columns=["ts", "total_equity", "fut_equity", "spot_equity"])
-    df = pd.read_csv(EQLOG)
+    df = pd.read_csv(P["equity"])
     df["ts"] = pd.to_datetime(df["ts"])
     return df
 
 
 def read_rebalances() -> pd.DataFrame:
-    return pd.read_csv(REBLOG) if REBLOG.exists() else pd.DataFrame()
+    return pd.read_csv(P["rebalance"]) if P["rebalance"].exists() else pd.DataFrame()
 
 
 def read_status() -> dict:
-    if not STATUS.exists():
+    if not P["status"].exists():
         return {}
     try:
-        return json.loads(STATUS.read_text())
+        return json.loads(P["status"].read_text())
     except Exception:
         return {}
 
 
 def read_config() -> dict:
-    cfg = dict(DEFAULT_CONFIG)
-    if CONFIG.exists():
+    cfg = dict(config.DEFAULT_CONFIG)
+    if P["config"].exists():
         try:
-            cfg.update(json.loads(CONFIG.read_text()))
+            cfg.update(json.loads(P["config"].read_text()))
         except Exception:
             pass
     return cfg
 
 
 def write_config(updates: dict) -> None:
-    DATA.mkdir(parents=True, exist_ok=True)
     cfg = read_config()
     cfg.update(updates)
-    CONFIG.write_text(json.dumps(cfg, indent=2))
+    P["config"].write_text(json.dumps(cfg, indent=2))
 
 
 def is_running() -> bool:
-    """True if the bot wrote a heartbeat recently (within ~2.5 intervals)."""
     s = read_status()
     hb = s.get("last_heartbeat")
     if not hb:
@@ -78,15 +72,21 @@ def is_running() -> bool:
     return age < max(interval * 60 * 2.5, 180)
 
 
+def _cli(*cmd):
+    return [PYEXE, "-m", "quant_bot_manager.cli", *cmd]
+
+
 def start_bot(cfg: dict) -> str:
     write_config({**cfg, "paused": False})
     flags = 0
     if os.name == "nt":
-        flags = 0x00000008 | subprocess.CREATE_NEW_PROCESS_GROUP   # DETACHED_PROCESS: survive the UI process
+        flags = 0x00000008 | subprocess.CREATE_NEW_PROCESS_GROUP   # DETACHED_PROCESS
     subprocess.Popen(
-        [PYEXE, str(LOOP), "--interval-min", str(cfg["interval_min"]), "--capital", str(cfg["capital"]),
-         "--method", cfg["method"], "--max-gross", str(cfg["max_gross"])],
-        cwd=str(ROOT), creationflags=flags, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
+        _cli("run", "--bot", BOT, "--mode", "demo", "--capital", str(cfg["capital"]),
+             "--method", cfg["method"], "--max-gross", str(cfg["max_gross"]),
+             "--interval-min", str(cfg["interval_min"])),
+        cwd=str(config.ROOT), env=_ENV, creationflags=flags,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
     return "start requested"
 
 
@@ -111,6 +111,6 @@ def set_paused(paused: bool) -> None:
 
 def manual_rebalance(capital: float, method: str) -> str:
     r = subprocess.run(
-        [PYEXE, str(ONESHOT), "--mode", "demo", "--method", method, "--capital", str(capital)],
-        cwd=str(ROOT), capture_output=True, text=True, timeout=240)
+        _cli("rebalance", "--bot", BOT, "--mode", "demo", "--capital", str(capital), "--method", method),
+        cwd=str(config.ROOT), env=_ENV, capture_output=True, text=True, timeout=240)
     return (r.stdout or "") + (r.stderr or "")
