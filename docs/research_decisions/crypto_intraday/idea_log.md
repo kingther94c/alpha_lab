@@ -45,7 +45,7 @@ Sources marked `internal prior / not externally verified` are my own assumptions
 
 | # | name | source | intuition | data | horizon | turnover | cost sensitivity | leakage risk | status | notes |
 |---|------|--------|-----------|------|---------|----------|------------------|--------------|--------|-------|
-| 16 | funding_contrarian | internal prior; commonly-discussed crypto mechanic | crowded-long funding flips, take other side | funding (perp) | 8h–24h | low | low | high if not lagged; LOW with proper shift | deferred | funding-as-feature requires strict ts-known-only handling |
+| 16 | funding_contrarian | internal prior; commonly-discussed crypto mechanic | crowded-long funding flips, take other side | funding (perp) | 8h–24h | low | low | high if not lagged; LOW with proper shift | **BUILT → accept_monitoring (P7, S4)** | banded daily funding-z fade (enter \|z\|>1, exit<0.3, dormant otherwise); directional contrarian; net Sharpe 0.57; orthogonal (ρ≈−0.29 vs trend) |
 | 17 | funding_momentum | internal prior | funding stickiness predicts return continuation | funding | 8h–24h | low | low | low (lagged) | deferred | counterintuitive — folk wisdom prefers contrarian |
 | 18 | high_funding_short_filter | internal prior | when funding is extreme positive, longs are overcrowded — short with vol filter | funding + vol | 8h–1d | low | low | low (lagged) | deferred | gate on percentile rank of funding |
 | 19 | low_neg_funding_long_filter | internal prior | when funding is extreme negative, shorts are crowded — long with filter | funding | 8h–1d | low | low | low | deferred | mirror of #18 |
@@ -59,7 +59,7 @@ Sources marked `internal prior / not externally verified` are my own assumptions
 | # | name | source | intuition | data | horizon | turnover | cost sensitivity | leakage risk | status | notes |
 |---|------|--------|-----------|------|---------|----------|------------------|--------------|--------|-------|
 | 24 | btc_leads_eth | internal prior; long-discussed in crypto | BTC moves first, ETH catches up | both closes | 5m–1h | medium | high | low (strict shift on BTC return) | deferred | rolling regression of ETH-fwd on BTC-lag-k ret |
-| 25 | relative_strength | classical equities (e.g. Jegadeesh-Titman 1993; not retrieved) | long stronger, short weaker | wide panel | 1h–4h | low | low | low | deferred | only 2 symbols here — degenerate but still defines a sign |
+| 25 | relative_strength | classical equities (e.g. Jegadeesh-Titman 1993; not retrieved) | long stronger, short weaker | wide panel | 1h–4h | low | low | low | **BUILT → accept_monitoring (P7, S3)** | widened to BTC/ETH/SOL/BNB perps, daily 30d formation, long top2/short bot2; market-neutral, net Sharpe 0.47 |
 | 26 | spread_z_pair_trade | classical stat-arb | log-spread reverts | both closes | 1h–4h | medium | medium | low | deferred | z-score of log(BTC/ETH) over rolling window |
 | 27 | rolling_beta_residual | classical (CAPM residual) | residual of ETH-on-BTC regression mean-reverts | both closes | 1h–4h | medium | medium | low | deferred | uses `rolling_beta_residual` helper in features/intraday.py |
 | 28 | correlation_regime | internal prior | when correlation breaks down, pair trade pays | both closes | 1h–4h | low | low | low | deferred | as overlay, not standalone signal |
@@ -95,6 +95,18 @@ Sources marked `internal prior / not externally verified` are my own assumptions
 | 43 | gradient_boosting | classical | sklearn HistGradientBoosting or LightGBM | features | 5m–1h | depends | depends | medium | deferred | LightGBM in env |
 | 44 | simple_ensemble | classical | equal-weight or val-ranked combination | strategy returns | n/a | derived | derived | low | deferred | combine surviving rule-based + ML |
 | 45 | meta_model_gate | de Prado | classifier on whether to take the underlying signal | strategy signal + features | per-trade | low | medium | high (must respect signal lag) | deferred | classic meta-labeling pattern |
+
+## P7 — Multi-strategy book (five low-correlation sleeves)
+
+Goal: assemble 5 sleeves each anchored to a *different* return source so PnL is orthogonal by
+construction, then combine them. Ideas generated via the `idea-generation` skill (random stimuli →
+operators → one idea per return source). All daily, leak-safe, excess-of-cash. See `P7-multi-strategy-book.md`.
+
+| # | name | source | intuition | data | horizon | turnover | cost sensitivity | leakage risk | status | notes |
+|---|------|--------|-----------|------|---------|----------|------------------|--------------|--------|-------|
+| 46 | ts_trend_daily_ls | well-known (Moskowitz/Ooi/Pedersen 2012, TS-momentum) | BTC/ETH above/below 50d MA, long/short on perp | perp close | 1 day | low (~19/yr) | medium | low (lagged) | **BUILT → accept_monitoring (P7, S2)** | net Sharpe 0.67; profits in 2022 bear; the directional sleeve |
+| 47 | macro_credit_gate | internal prior; credit-as-risk-appetite (rehab of dropped #37) | hold crypto only when HYG credit regime risk-on (non-price-volume gate) | HYG (yfinance) / BAA10Y (FRED) | 1 day | low (~10/yr) | low | low (lagged a day) | **BUILT → accept_monitoring (P7, S5)** | net Sharpe 0.50; orthogonal (|ρ|≤0.12); driven by exogenous macro, not crypto price |
+| 48 | multi_strategy_book | portfolio theory; #44 ensemble realized | combine S1–S5 (carry/trend/XS-mom/funding-contra/macro) by equal-capital + risk-budget | the five sleeve returns | 1 day | derived | derived | low | **BUILT → accept_monitoring (P7)** | mean\|ρ\|=0.11, ΣρPairs=−0.25, DR=2.0; combo Sharpe **1.15** vs BTC 0.51, CAGR 20% vs 14%, MaxDD −15% vs −67%; +ve every year incl. 2025 OOS |
 
 ## Caveats
 
