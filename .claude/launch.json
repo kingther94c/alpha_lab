@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quant-bot-ui",
+      "runtimeExecutable": "D:/conda/envs/py313/python.exe",
+      "runtimeArgs": [
+        "-m", "streamlit", "run", "src/quant_bot_manager/ui/app.py",
+        "--server.headless", "true", "--server.port", "8501",
+        "--browser.gatherUsageStats", "false"
+      ],
+      "port": 8501
+    }
+  ]
+}
