@@ -36,8 +36,10 @@ class BinanceBroker(Broker):
             dk, ds = os.environ.get("BINANCE_DEMO_KEY"), os.environ.get("BINANCE_DEMO_SECRET")
             if not (dk and ds):
                 raise RuntimeError("no BINANCE_DEMO_KEY/SECRET in .env")
-            self.spot = ccxt.binance({"apiKey": dk, "secret": ds, "enableRateLimit": True}); self.spot.enableDemoTrading(True)
-            self.fut = ccxt.binanceusdm({"apiKey": dk, "secret": ds, "enableRateLimit": True}); self.fut.enableDemoTrading(True)
+            self.spot = ccxt.binance({"apiKey": dk, "secret": ds, "enableRateLimit": True})
+            self.spot.enableDemoTrading(True)
+            self.fut = ccxt.binanceusdm({"apiKey": dk, "secret": ds, "enableRateLimit": True})
+            self.fut.enableDemoTrading(True)
         else:
             live = self.mode == "live"
             if live and os.environ.get("CONFIRM_LIVE") != "YES":

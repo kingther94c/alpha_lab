@@ -20,7 +20,7 @@ PERP_CCXT = {"BTC.p": "BTC/USDT:USDT", "ETH.p": "ETH/USDT:USDT",
 SPOT_CCXT = {"BTC.s": "BTC/USDT", "ETH.s": "ETH/USDT"}
 
 
-def build_live_bookdata(lookback_days: int = 420) -> "cb.BookData":
+def build_live_bookdata(lookback_days: int = 420) -> cb.BookData:
     """A crypto_book.BookData built from live Binance API data (daily, through yesterday)."""
     spot_ex = ccxt.binance({"enableRateLimit": True})
     fut_ex = ccxt.binanceusdm({"enableRateLimit": True})
@@ -32,7 +32,7 @@ def build_live_bookdata(lookback_days: int = 420) -> "cb.BookData":
     perp_close = pd.DataFrame({leg: closes(fut_ex, s) for leg, s in PERP_CCXT.items()})
     spot_close = pd.DataFrame({leg: closes(spot_ex, s) for leg, s in SPOT_CCXT.items()})
     grid = perp_close.index.union(spot_close.index)
-    today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+    today = dt.datetime.now(dt.UTC).date().isoformat()
     grid = grid[grid < pd.Timestamp(today, tz="UTC")]            # drop today's forming bar -> leak-safe
     perp_close, spot_close = perp_close.reindex(grid).ffill(), spot_close.reindex(grid).ffill()
     prices = pd.concat([spot_close, perp_close], axis=1)

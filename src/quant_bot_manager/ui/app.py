@@ -3,6 +3,7 @@
 Run:  streamlit run src/quant_bot_manager/ui/app.py
 """
 from __future__ import annotations
+
 import datetime as dt
 import sys
 from pathlib import Path
@@ -10,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # put src/ on path
 import pandas as pd
 import streamlit as st
+
 from quant_bot_manager.core import state
 
 st.set_page_config(page_title="Quant Bot Manager", layout="wide")
@@ -38,7 +40,7 @@ else:
 hb = status.get("last_heartbeat")
 if hb:
     try:
-        age = (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(hb)).total_seconds()
+        age = (dt.datetime.now(dt.UTC) - dt.datetime.fromisoformat(hb)).total_seconds()
         c4.metric("Heartbeat", f"{age / 60:.0f} min ago")
     except Exception:
         c4.metric("Heartbeat", "—")
@@ -99,12 +101,15 @@ with tab_ctrl:
     st.subheader("Run control")
     b1, b2, b3, b4 = st.columns(4)
     if b1.button("▶ Start", disabled=running, width="stretch"):
-        st.toast(state.start_bot(state.read_config())); st.rerun()
+        st.toast(state.start_bot(state.read_config()))
+        st.rerun()
     if b2.button("⏹ Stop", disabled=not running, width="stretch"):
-        st.toast(state.stop_bot()); st.rerun()
+        st.toast(state.stop_bot())
+        st.rerun()
     pause_lbl = "⏵ Resume" if cfg.get("paused") else "⏸ Pause"
     if b3.button(pause_lbl, disabled=not running, width="stretch"):
-        state.set_paused(not cfg.get("paused")); st.rerun()
+        state.set_paused(not cfg.get("paused"))
+        st.rerun()
     if b4.button("🔁 Rebalance now", width="stretch"):
         with st.spinner("placing demo orders…"):
             out = state.manual_rebalance(cur["capital"], cur["method"])

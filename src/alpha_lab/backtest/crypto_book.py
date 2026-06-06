@@ -78,10 +78,10 @@ def load_book_data(start: str, end: str, *, allow_holdout: bool = False,
                    holdout_config: str = "crypto_intraday") -> BookData:
     """Load and align everything the book needs. Set ``allow_holdout=True`` to
     deliberately release the PM-holdout lock (audited) for the final OOS eval / live."""
-    from alpha_lab.data.loaders.binance_vision import load_klines, load_funding
+    from alpha_lab.data.holdout import PMHoldout
+    from alpha_lab.data.loaders.binance_vision import load_funding, load_klines
     from alpha_lab.data.loaders.fred import discount_rate_to_daily_rate, load_series
     from alpha_lab.data.loaders.yfinance import load_prices
-    from alpha_lab.data.holdout import PMHoldout
 
     ho = None
     if allow_holdout:
@@ -107,7 +107,8 @@ def load_book_data(start: str, end: str, *, allow_holdout: bool = False,
         pass
     naive = grid.tz_localize(None).normalize()
     if rf_src is not None:
-        r = rf_src.copy(); r.index = pd.DatetimeIndex(r.index).normalize()
+        r = rf_src.copy()
+        r.index = pd.DatetimeIndex(r.index).normalize()
         rf_daily = r.reindex(naive).ffill().fillna(0.0)
     else:
         rf_daily = pd.Series([RF_FALLBACK.get(d.year, 0.04) / 365 for d in naive], index=naive)
@@ -129,7 +130,7 @@ def load_book_data(start: str, end: str, *, allow_holdout: bool = False,
 # --------------------------------------------------------------------------------------
 def sleeve_weights(bd: BookData) -> dict[str, tuple[pd.DataFrame, list[str], bool]]:
     """Return {name: (weight_frame, price_cols, use_funding)} for the five sleeves."""
-    grid, perp, spot, df_fund, hyg = bd.grid, bd.perp_close, bd.spot_close, bd.df_fund, bd.hyg
+    grid, perp, _, df_fund, hyg = bd.grid, bd.perp_close, bd.spot_close, bd.df_fund, bd.hyg
     out: dict[str, tuple[pd.DataFrame, list[str], bool]] = {}
 
     # S1 carry — long spot / short perp when 7d funding > 0 (market-neutral)

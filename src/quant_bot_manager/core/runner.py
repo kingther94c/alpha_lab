@@ -20,7 +20,7 @@ from quant_bot_manager.core import config
 
 
 def utcnow():
-    return dt.datetime.now(dt.timezone.utc)
+    return dt.datetime.now(dt.UTC)
 
 
 def _append_csv(path, header, row):

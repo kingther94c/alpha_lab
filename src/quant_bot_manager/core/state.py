@@ -65,7 +65,7 @@ def is_running() -> bool:
     if not hb:
         return False
     try:
-        age = (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(hb)).total_seconds()
+        age = (dt.datetime.now(dt.UTC) - dt.datetime.fromisoformat(hb)).total_seconds()
     except Exception:
         return False
     interval = float((s.get("config") or {}).get("interval_min", 15))

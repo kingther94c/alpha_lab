@@ -4,8 +4,8 @@ The registry lets the manager/UI run several bots by name. Today there is one: t
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from quant_bot_manager.brokers.base import Broker
 from quant_bot_manager.brokers.binance import BinanceBroker
