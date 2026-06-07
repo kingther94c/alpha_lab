@@ -153,12 +153,15 @@ if hsl_p.exists() and hco_p.exists():
     sleeve26 = "".join(f"<tr><td><b style='color:{COL[k]}'>{NAMES[k]}</b></td><td class=n>{(((1+h_sl[k].dropna()).prod())-1)*100:+.1f}%</td></tr>" for k in h_sl.columns)
     off26 = h_sl.corr().where(~np.eye(len(h_sl.columns), dtype=bool)).abs().mean().mean()
     oos_section = f"""<h2>6 &middot; 2026 holdout &mdash; the out-of-sample moment of truth</h2>
-<div class="note"><b>Honest result.</b> On the reserved 2026 window (Jan&ndash;May, released under audit), the book was
-<b>defensive but negative</b>: equal-capital <b>{o_eq[0]*100:+.1f}%</b> vs BTC <b>{o_btc[0]*100:+.1f}%</b> &mdash; it cut the
-loss by ~{abs(o_btc[0]-o_eq[0])*100:.0f} pts and held drawdown to {o_eq[2]*100:.0f}% (BTC {o_btc[2]*100:.0f}%), but it did
-<b>not</b> make money. Driver: the <b>macro sleeve (S5) misfired</b> (held crypto long into the selloff, -29%) and
-<b>carry compressed</b> to ~0; trend (S2, +5%) was the only positive sleeve. Cross-sleeve |&rho;| rose 0.11&rarr;{off26:.2f} &mdash;
-diversification partially degraded under stress. <b>Implication for going live: paper-trade first; S5 is the prime fix candidate before sizing up.</b></div>
+<div class="note"><b>Honest result (v3.1, post S5 fix).</b> On the reserved 2026 window (Jan&ndash;May, released under audit),
+the book was <b>defensive but negative</b>: equal-capital <b>{o_eq[0]*100:+.1f}%</b> vs BTC <b>{o_btc[0]*100:+.1f}%</b>
+&mdash; it cut the loss by ~{abs(o_btc[0]-o_eq[0])*100:.0f} pts and held drawdown to {o_eq[2]*100:.0f}% (BTC {o_btc[2]*100:.0f}%),
+but it did <b>not</b> make money. The <b>macro sleeve (S5)</b> &mdash; now <b>vol-targeted</b> (the v3.1 fix) &mdash; lost
+{((1+h_sl['S5_macro'].dropna()).prod()-1)*100:+.0f}% (it was &minus;29% before the fix): a vol-gated long-crypto sleeve still
+bleeds in a crypto-led bear that credit never flagged. <b>Carry compressed</b> to ~0; trend (S2, +5%) was the only positive
+sleeve. Cross-sleeve |&rho;| rose 0.11&rarr;{off26:.2f} under stress. <b>Lesson:</b> the book <i>defends</i> a crypto bear
+(a third of BTC's loss) but won't <i>profit</i> in one without a genuinely positive non-beta sleeve &mdash; so paper-trade the
+live book forward and keep watching S5 &amp; carry.</div>
 <img src="data:image/png;base64,{c_oos}">
 <div class="grid2">
  <div><table><tr><th>2026 OOS book</th><th class=n>Return</th><th class=n>annSharpe</th><th class=n>MaxDD</th></tr>{tbl26}</table></div>
@@ -231,8 +234,8 @@ HTML = f"""<!doctype html><html><head><meta charset="utf-8"><title>Crypto multi-
 </style></head><body>
 
 <h1>Crypto multi-strategy book — five low-correlation sleeves</h1>
-<div class="sub">Research report · 2026-06-04 · BTC/ETH/SOL/BNB, daily, 2022–2025 (2025 out-of-sample) ·
-all returns <b>excess of cash</b>, net of costs + funding + financing · <code>alpha_lab</code> v3</div>
+<div class="sub">Research report · 2026-06-04 (rev 2026-06-07 · v3.1 S5 vol-target fix) · BTC/ETH/SOL/BNB, daily, 2022–2025 (2025 out-of-sample) ·
+all returns <b>excess of cash</b>, net of costs + funding + financing · <code>alpha_lab</code> v3.1</div>
 
 <div class="ok"><b>Thesis.</b> Five sleeves, each paid by a <b>different return source</b> — carry, trend,
 cross-sectional momentum, order-flow, and macro regime — are by construction nearly uncorrelated
@@ -283,8 +286,9 @@ prior <code>P6</code> edge, here daily-grid). <b>S2 Trend</b> — BTC/ETH perp l
 time-series momentum, profits in the 2022 bear. <b>S3 XS-Mom</b> — long the 2 strongest / short the 2 weakest of
 {{BTC,ETH,SOL,BNB}} by 30-day return; market-neutral cross-sectional dispersion. <b>S4 Funding-contra</b> — fade
 crowded funding extremes (banded z-score, dormant until stretched); pays you to provide liquidity to over-levered
-positioning. <b>S5 Macro-gate</b> — hold crypto only when the HYG credit regime is risk-on; a <b>non-price-volume</b>
-signal, so its PnL is driven by exogenous macro state.</div>
+positioning. <b>S5 Macro-gate</b> — hold BTC/ETH spot only when the HYG credit regime is risk-on, with the position
+<b>vol-targeted to ~25%/yr</b> (v3.1 fix) so this long-beta sleeve can't dominate drawdowns; a <b>non-price-volume</b>
+gate, so its PnL is driven by exogenous macro state.</div>
 
 <h2>3 · Why they are low-correlation</h2>
 <div class="grid2">
@@ -329,7 +333,7 @@ It is not a single "alpha" — it is a <i>portfolio</i> whose edge is the low co
  <li><b>Carry compression</b> — S1's funding edge shrinks if perp funding trends to zero; it is the Sharpe anchor, so monitor the funding−financing spread.</li>
  <li><b>Momentum crashes</b> — S2/S3 share a momentum root; a sharp V-reversal hurts both at once (their +{corr.loc['S2_trend','S3_xsmom']:.2f} correlation is the book's main concentration).</li>
  <li><b>Turnover sensitivity</b> — S3 (≈{diag['S3_xsmom']['ann_turnover']:.0f}×/yr) and S4 (≈{diag['S4_fundcontra']['ann_turnover']:.0f}×/yr) are the cost-sensitive sleeves; double the cost assumption and re-check.</li>
- <li><b>Macro proxy</b> — S5 uses HYG as a credit-regime proxy (FRED BAA10Y is the cleaner non-price source once the endpoint is reachable); the gate's value depends on macro actually driving crypto, which is regime-dependent.</li>
+ <li><b>Macro proxy / S5</b> — the credit gate only helps when macro actually drives crypto; in 2026 crypto fell while credit stayed calm, so the gate never fired. Cleaner credit signals (HYG/LQD spread, FRED BAA10Y) were tested and did <b>not</b> help (credit decoupled from crypto). The v3.1 fix instead <b>vol-targets</b> the sleeve (it was the hottest leg, ~50%/yr) to bound its drawdown — it remains a long-beta sleeve that bleeds in a crypto-led bear.</li>
  <li><b>Capacity</b> — sleeves trade BTC/ETH/SOL/BNB perps + BTC/ETH spot; deep enough for a personal book, but SOL/BNB legs and the short perp funding/borrow are the binding constraints at size.</li>
 </ul>
 

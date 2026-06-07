@@ -33,8 +33,8 @@ btc_bh = (bd.spot_close["BTC.s"].pct_change() - bd.rf_daily).rename("btc_bh_exce
 EOY25 = pd.Timestamp("2025-12-31", tz="UTC")
 R_pre = R.loc[BURN:EOY25]
 off = R_pre.corr().where(~np.eye(5, dtype=bool)).abs()
-log(f"\nreproduction check (pre-2026): mean|corr|={off.mean().mean():.3f} (committed 0.111), "
-    f"combo_eqcap Sharpe={summary(combos['combo_eqcap'].loc[BURN:EOY25].dropna(), periods=BARS)['Sharpe']:.2f} (committed 1.15)")
+log(f"\nreproduction check (pre-2026): mean|corr|={off.mean().mean():.3f} (committed 0.112, v3.1), "
+    f"combo_eqcap Sharpe={summary(combos['combo_eqcap'].loc[BURN:EOY25].dropna(), periods=BARS)['Sharpe']:.2f} (committed 1.11, v3.1)")
 
 # ---- 2026 out-of-sample --------------------------------------------------------
 m26 = R.index >= pd.Timestamp("2026-01-01", tz="UTC")

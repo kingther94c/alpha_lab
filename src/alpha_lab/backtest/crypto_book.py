@@ -28,6 +28,11 @@ SYM = {"BTCUSDT": "BTC", "ETHUSDT": "ETH", "SOLUSDT": "SOL", "BNBUSDT": "BNB"}
 PERP = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]
 SPOT = ["BTCUSDT", "ETHUSDT"]
 RF_FALLBACK = {2022: 0.020, 2023: 0.0521, 2024: 0.0505, 2025: 0.0425, 2026: 0.043}
+# S5 vol-target (2026 fix): the macro sleeve was the hottest leg (~46-51%/yr vol) and, being
+# undefended long beta, lost -29% in 2026 when the credit gate stayed risk-on through a crypto
+# drop. Risk-normalising it to ~S5_VOLTGT/yr (leverage-capped) caps its drag. Params chosen on
+# in-sample (<=2025) only and stable across a 3x2x3 neighbour grid.
+S5_VOLTGT, S5_LEVCAP, S5_VOLWIN = 0.25, 2.0, 30
 
 SLEEVE_SOURCE = {
     "S1_carry": "perp funding carry (market-neutral)",
@@ -130,7 +135,7 @@ def load_book_data(start: str, end: str, *, allow_holdout: bool = False,
 # --------------------------------------------------------------------------------------
 def sleeve_weights(bd: BookData) -> dict[str, tuple[pd.DataFrame, list[str], bool]]:
     """Return {name: (weight_frame, price_cols, use_funding)} for the five sleeves."""
-    grid, perp, _, df_fund, hyg = bd.grid, bd.perp_close, bd.spot_close, bd.df_fund, bd.hyg
+    grid, perp, spot, df_fund, hyg = bd.grid, bd.perp_close, bd.spot_close, bd.df_fund, bd.hyg
     out: dict[str, tuple[pd.DataFrame, list[str], bool]] = {}
 
     # S1 carry — long spot / short perp when 7d funding > 0 (market-neutral)
@@ -158,9 +163,14 @@ def sleeve_weights(bd: BookData) -> dict[str, tuple[pd.DataFrame, list[str], boo
         w4[c] = 0.5 * banded(z, 1.0, 0.3)
     out["S4_fundcontra"] = (w4, ["BTC.p", "ETH.p"], True)
 
-    # S5 macro — hold crypto only when HYG credit regime risk-on
+    # S5 macro — long BTC/ETH spot when HYG credit regime risk-on, position vol-targeted to
+    # ~S5_VOLTGT/yr (leverage-capped) so this once-hottest, long-beta sleeve can't dominate the
+    # book's drawdown when the slow credit gate misses a crypto-led drop (the 2026 fix).
     ro = (hyg.shift(1) > hyg.shift(1).rolling(50).mean()).astype(float)
-    w5 = pd.DataFrame({"BTC.s": 0.5 * ro, "ETH.s": 0.5 * ro}).reindex(grid)
+    proxy = (0.5 * spot[["BTC.s", "ETH.s"]].pct_change()).sum(axis=1)        # 0.5/0.5 long-crypto pnl
+    svol = proxy.rolling(S5_VOLWIN).std().shift(1) * np.sqrt(BARS)           # trailing realized vol (leak-safe)
+    scale = (S5_VOLTGT / svol).clip(upper=S5_LEVCAP).fillna(0.0)
+    w5 = pd.DataFrame({"BTC.s": 0.5 * ro, "ETH.s": 0.5 * ro}).reindex(grid).mul(scale, axis=0)
     out["S5_macro"] = (w5, ["BTC.s", "ETH.s"], False)
     return out
 

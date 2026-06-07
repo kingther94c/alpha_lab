@@ -13,6 +13,47 @@
 
 ---
 
+## 0. v3.1 update (2026-06-07) — S5 macro sleeve vol-target fix
+
+**What changed.** The 2026 holdout exposed S5 (macro credit-gate) as the book's weak point: it was
+*undefended long crypto beta* (long 0.5 `BTC.s` + 0.5 `ETH.s` when HYG risk-on) and lost **−29.5%** in
+2026 when crypto fell ~17% while credit (HYG) stayed calm — the slow credit gate never fired. S5 was
+also the hottest leg (~46–51%/yr vol), so at equal capital it dominated the book's drawdown.
+
+**Fix (selected on in-sample ≤2025 only).** Keep the HYG risk-on gate but **vol-target the position to
+~25%/yr** (30-day trailing vol, leverage-capped 2×) — `S5_VOLTGT/S5_LEVCAP/S5_VOLWIN` in
+`crypto_book.py`. Chosen by an explicit in-sample rule (improve S5 MaxDD, keep book Sharpe & low
+correlation) over 6 candidates and **stable across a 3×2×3 neighbour grid**. Notably, *cleaner credit
+signals did **not** help*: HYG/LQD spread and FRED `BAA10Y` left S5 no better in-sample (credit
+genuinely decoupled from crypto), and an own-trend stop helped 2026 but raised mean|ρ| 0.11→0.16 (S5
+started mimicking S2), so it was rejected for eroding the diversification thesis. Risk-normalising the
+existing sleeve was the disciplined, non-overfit fix.
+
+| metric | v3 (raw S5) | **v3.1 (vol-target S5)** |
+|---|---|---|
+| In-sample combo Sharpe | 1.15 | **1.10** |
+| In-sample combo CAGR | 20.1% | **17.1%** |
+| In-sample combo MaxDD | −15.0% | **−12.2%** |
+| In-sample combo Calmar | 1.34 | **1.39** |
+| In-sample mean\|ρ\| | 0.111 | **0.112** |
+| **2026 holdout — book (eq-cap)** | **−5.0%** | **−2.6%** |
+| 2026 holdout — book MaxDD | −13.3% | **−9.4%** |
+| 2026 holdout — S5 sleeve | −29.5% | **−17.2%** |
+| 2026 holdout — vs BTC | −17.4% | −17.4% |
+
+**Honest trade-off.** Vol-targeting also trims S5's bull exposure, so full-cycle CAGR/Sharpe dip
+slightly and the 2024 one-way bull goes from +1.7% to **−3.3%** — the book is *no longer positive every
+calendar year*. In exchange the full-cycle drawdown is lower (Calmar up) and the 2026 bear loss is
+roughly halved. **The deeper lesson stands: a long-beta sleeve gated by a slow macro signal *defends* a
+crypto bear (a third of BTC's loss) but cannot *profit* in one. The book is a diversified risk-reducer,
+not a bear-market alpha — the next genuine improvement is a positive non-beta sleeve, not a better
+credit proxy.**
+
+Reproduce: selection harness `notebooks/90_crypto_intraday/fix_s5.py`; artifacts regenerated from the
+source of truth via `rebuild_v3_artifacts.py` → `render_multi_strategy_report.py` (report rev v3.1).
+
+---
+
 ## 1. Research question
 
 Can we assemble **five crypto strategies with low mutual correlation** — each anchored to a
@@ -54,7 +95,7 @@ more bar), and reported **excess of cash**.
 | **S2 trend** | perp close vs 50d MA | long/short | ±0.5 BTC.p, ETH.p |
 | **S3 xsmom** | rank by 30d return, long top2 / short bot2 | market-neutral | demeaned-rank over 4 perps |
 | **S4 fundcontra** | banded funding z (enter \|z\|>1, exit<0.3) | directional contrarian | −0.5·sign(z) BTC.p, ETH.p |
-| **S5 macro** | HYG above its 50d MA → risk-on | long/flat | 0.5 BTC.s, ETH.s when risk-on |
+| **S5 macro** | HYG above its 50d MA → risk-on, **position vol-targeted ~25%/yr** (v3.1, §0) | long/flat | 0.5 BTC.s, ETH.s × vol-scalar when risk-on |
 
 - **Combination:** (a) **equal-capital** — 20% per sleeve, no leverage assumptions (headline);
   (b) **risk-budget** — scale each sleeve to ~8%/yr vol (trailing-vol, leverage-capped at 10×),
@@ -92,7 +133,7 @@ the driver. Over the full cycle the book beats BTC on **both** return and drawdo
 ## 6. Diagnostics
 
 - **Correlation:** mean |ρ| = **0.111**, max 0.319 (S2↔S3), **sum of pairwise ρ = −0.246** (net-negative). Diversification ratio = **2.03**.
-- **By year (equal-capital combo vs BTC):** 2022 **+11.2%** / −64.2% · 2023 +34.4% / +142.7% · 2024 **+1.7%** / +110.4% · 2025 OOS **+30.8%** / −10.2%. Positive every calendar year; the lone underperformance is the 2024 one-way bull (hedged book gives up beta).
+- **By year (equal-capital combo vs BTC):** 2022 **+11.2%** / −64.2% · 2023 +34.4% / +142.7% · 2024 **+1.7%** / +110.4% · 2025 OOS **+30.8%** / −10.2%. Positive every calendar year; the lone underperformance is the 2024 one-way bull (hedged book gives up beta). *(v3.1, §0: 2022 +10.0% · 2023 +28.4% · 2024 **−3.3%** · 2025 +32.3% — the S5 vol-target turns the 2024 bull slightly negative, the cost of de-risking the long-beta sleeve.)*
 - **Equity & drawdown** curves, correlation heatmap, per-year bars, risk-return scatter: see the HTML report.
 
 ## 7. Robustness
@@ -111,7 +152,7 @@ the driver. Over the full cycle the book beats BTC on **both** return and drawdo
 - **Carry compression** — S1 is the Sharpe anchor; if perp funding trends to zero the funding−financing spread vanishes (P6's documented risk). Monitor the spread.
 - **Momentum crash** — S2 and S3 share a momentum root (ρ = 0.32, the book's main concentration); a sharp V-reversal hurts both together.
 - **Turnover / cost sensitivity** — S3 (~51×/yr) and S4 (~39×/yr) carry the most cost; double the slippage assumption and re-confirm before sizing.
-- **Macro proxy** — S5 uses HYG as a credit-regime proxy; FRED `BAA10Y` is the cleaner non-price source once the endpoint is reliable. The gate only adds value when macro actually drives crypto (regime-dependent).
+- **Macro proxy / S5** — *(updated v3.1, §0)* the credit gate only adds value when macro actually drives crypto; in 2026 it didn't. Cleaner credit signals (HYG/LQD spread, FRED `BAA10Y`) were tested and **didn't help** — the fix was to **vol-target** the sleeve so its drawdown is bounded. It remains a long-beta sleeve that bleeds in a crypto-led bear (the residual failure mode).
 - **Financing approximation** — rf used a piecewise-by-year fallback (FRED timed out); a vintage DTB3 path would tighten the cost-of-cash numbers slightly.
 - **Capacity** — SOL/BNB perp legs and short-perp funding/borrow are the binding constraints at size; fine for a personal book.
 
@@ -127,7 +168,8 @@ it goes ≤ 0 for two consecutive quarters.
 ## 10. Next steps
 
 - Lift the five sleeve constructors from the notebook into `src/alpha_lab/backtest/` (backlog) — they are currently inline.
-- Replace the rf fallback with vintage FRED DTB3 and swap S5's HYG proxy for FRED `BAA10Y` once the endpoint is reliable.
+- ~~swap S5's HYG proxy for FRED `BAA10Y`~~ — **closed (v3.1, §0):** BAA10Y & HYG/LQD tested, no improvement; adopted **vol-targeting** instead. Replace the rf fallback with vintage FRED DTB3 once the endpoint is reliable (still open).
+- **Add a positive non-beta sleeve** — the v3.1 book *defends* a crypto bear but doesn't *profit* in one; a sleeve that is genuinely positive in a crypto-led selloff (e.g. a short-bias/trend-on-credit or a vol/dispersion harvester) is the highest-value next idea.
 - Block-bootstrap the combined Sharpe and run a parameter-stability grid on the four tunable sleeves.
 - Build the real collateral-yield model for the carry leg (P6 scenario C) so S1's risk-budget leverage is justified.
 - Add to the monitoring set; revisit weighting (the risk-budget leverage on carry is the main live-trading judgment call).
