@@ -1,0 +1,3 @@
+# Repo default is core.autocrlf=true on this Windows box. Shell scripts MUST stay LF so the
+# shebang (#!/usr/bin/env bash) isn't broken by a trailing CR on Unix / WSL.
+*.sh text eol=lf
