@@ -51,6 +51,20 @@ from alpha_lab.utils.paths import PROJECT_ROOT, DATA_DIR
 from alpha_lab.analytics.returns import simple_returns, sharpe
 ```
 
+## Research → execution (mock trading)
+
+`alpha_lab` *finds* edges; the **`quant_bot_manager`** leg *runs* them as mock/live bots (brokers,
+runner, CLI, Streamlit cockpit). End-to-end workflow — research loop, the target-weight handoff,
+running & monitoring a bot, risk/kill-switch, going live:
+**[docs/research_to_execution.md](docs/research_to_execution.md)**.
+
+One-click mock stack (Binance **demo** funds) — starts the bot + the cockpit:
+
+```bash
+make demo-up        # no make? -> D:/conda/envs/py313/python.exe scripts/demo.py up
+# cockpit -> http://localhost:8501   ·   make demo-down (stop)   ·   make demo-status (health)
+```
+
 ## Where things go
 
 | Kind of code                                   | Where                              |
@@ -88,6 +102,7 @@ Fast iteration first. Reusable helpers second. Reports optional later. Don't dum
 
 Durable knowledge lives under `docs/` — start at [`docs/README.md`](docs/README.md):
 
+- [Research → execution guide](docs/research_to_execution.md) — operate the full pipeline as a mock bot (CLI, cockpit, risk, going-live gates).
 - [Architecture](docs/architecture/alpha_lab_architecture.md) — directory ownership.
 - [Research artifact contracts](docs/contracts/research_artifacts.md) — shapes of universes, panels, weights, backtest results.
 - [Strategy research notebook template](notebooks/_templates/strategy_research_template.md) — start every new study from this outline.

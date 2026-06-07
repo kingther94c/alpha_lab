@@ -13,6 +13,8 @@ The project has **two legs**:
 
 The handoff is a **strategy's target-weight function**: research produces it (e.g. `alpha_lab.backtest.crypto_book`), a `quant_bot_manager` *strategy* adapts it to live data, and a *bot* (strategy + broker) trades it. Keep the legs decoupled — **execution imports research, never the reverse.**
 
+**Operator's guide:** [docs/research_to_execution.md](docs/research_to_execution.md) — the end-to-end research→execution workflow. One-click mock stack (demo funds): `make demo-up` (or `& D:\conda\envs\py313\python.exe scripts\demo.py up`) → bot + cockpit at http://localhost:8501; `make demo-down` to stop.
+
 ## Environment
 
 - **Python**: 3.13 via conda env `py313`. Interpreter: `D:\conda\envs\py313\python.exe`.
