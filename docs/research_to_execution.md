@@ -91,6 +91,11 @@ is the entire contract between the legs.
 
 ## 4. Execution leg — run it as a mock bot
 
+> **One-click.** `make demo-up` — or `./scripts/demo.sh up`, or
+> `D:\conda\envs\py313\python.exe scripts\demo.py up` — starts the bot **and** the cockpit on demo
+> funds (idempotent). `… demo-down` stops both; `… demo-status` prints health. The rest of this
+> section is what that wraps.
+
 ### 4a. Anatomy of a bot (declarative)
 A bot = **strategy** (→ weights) + **feed** (market data) + **broker** (venue) + **default config**,
 wired in a YAML file the registry reads:

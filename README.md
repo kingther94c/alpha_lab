@@ -61,8 +61,9 @@ running & monitoring a bot, risk/kill-switch, going live:
 One-click mock stack (Binance **demo** funds) — starts the bot + the cockpit:
 
 ```bash
-make demo-up        # no make? -> D:/conda/envs/py313/python.exe scripts/demo.py up
-# cockpit -> http://localhost:8501   ·   make demo-down (stop)   ·   make demo-status (health)
+make demo-up                         # start mock bot + cockpit
+# alternatives:  ./scripts/demo.sh up   |   D:/conda/envs/py313/python.exe scripts/demo.py up
+# cockpit -> http://localhost:8501   ·   *-down to stop   ·   *-status for health
 ```
 
 ## Where things go
