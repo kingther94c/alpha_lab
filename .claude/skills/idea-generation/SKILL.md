@@ -16,171 +16,160 @@ description: >-
 
 # Idea generation (alpha_lab)
 
-A guided way to manufacture research ideas instead of waiting for them. It adapts ten
-well-studied creativity operators to *this* repo — its universes, its data loaders, its
-no-lookahead discipline — and routes every surviving idea into the project's existing
-research workflow (research question → economic mechanism → leak-safe signal → backtest →
-robustness → verdict).
+Manufacture research ideas instead of waiting for them. Generate widely with creativity
+operators, then filter hard through the repo's own research standards. The product is not idea
+*volume* — it is a handful of filtered, testable hypotheses, each ready to drop into a notebook.
 
-## Mental model: novelty bounded by tradeability
+**Core principle — novelty bounded by tradeability.** This is divergence on a leash: two moves
+in sequence, expand the search then evaluate hard. An idea is "appropriate" here only if it has
+an economic mechanism, is leak-safe, is testable with data we can get, and survives a skeptic.
+Pure novelty with no mechanism is data mining in a creativity costume — name it and drop it.
+Every idea must trace to a **real return source** ([`references/return_sources.md`](references/return_sources.md))
+that isn't already arbitraged away in its crowded form.
 
-Creativity research converges on two cognitive moves: **expand the search** (escape
-near-neighbour associations, change how the problem is represented) and **persist /
-evaluate** (push a "novel but vague" idea into "novel *and* appropriate"). Good ideation is
-not "think harder" — it is operating these two moves in sequence with short feedback loops.
+## When to use / not use
 
-For quant research the second move is unusually well-defined, and the repo already encodes
-it. An idea here is "appropriate" only if it has an **economic mechanism**, is **leak-safe /
-tradable**, is **testable with data we can actually get**, and **survives a skeptic**. So
-this skill is divergence on a leash: generate widely with the operators, then filter hard
-through the project's own research standards. Pure novelty with no mechanism is just data
-mining wearing a costume — name it and drop it.
+Use it when the user wants new strategy / factor / signal / overlay ideas, wants to expand or
+mutate a direction, is stuck, or asks "what else could I test here".
 
-Concretely, every idea must trace to a **real return source** — a risk premium, an anomaly, or a flow
-you're paid to absorb — that isn't already arbitraged away in its crowded form. The taxonomy of those
-sources, and where this repo can test each, lives in
-[`references/return_sources.md`](references/return_sources.md): you *generate* by moving along that map,
-and you *filter* by checking the idea isn't a known premium in disguise.
+**This skill stops at notebook-ready idea cards.** It does **not** run backtests, write full
+strategies, or draw performance conclusions. Once an idea is chosen, hand off to the notebook
+workflow — don't start testing inside this skill.
 
-## The operator map
+## Default behavior — proceed, don't stall
 
-Ten operators in five families. You rarely run all ten — diagnose what the moment needs
-(expand / transform / break / blend / iterate) and pull the matching tools. Full playbook
-with quant translations and worked examples grounded in this repo's real notebooks lives in
-[`references/operators.md`](references/operators.md) — read it when you run a session.
+- **Seed given** (asset, strategy to mutate, constraint, observation): use it.
+- **No seed:** do not stop to ask. Default to the repo's most active thread — check
+  `docs/research_decisions/` recency or the suite roadmap (at time of writing, the crypto-intraday
+  work under `notebooks/90_crypto_intraday/`) — and proceed. Only ask **one** question if the
+  asset / market / objective is genuinely absent and can't be defaulted.
+- Restate the target as a **functional relation** ("concentrate signal X while limiting cost Y") —
+  that phrasing is what makes analogy and TRIZ work.
+- Default output: **5–8 ranked idea cards**.
 
-| Family | Operator — *investment move* | Use it when… |
-|---|---|---|
-| **Expand search** | Remote / random stimulus — *jump to a far or underused return source / data input* | You keep landing near "momentum/value/carry on equities"; need a far jump |
-| | Structural analogy — *transplant a premium that works elsewhere* | A mechanism works *elsewhere* with the same relational shape (other asset, timeframe, literature) |
-| **Transform structure** | Morphological recombination — *recombine the strategy stack* | The problem decomposes into {universe × signal × horizon × regime × portfolio × timing}; search odd cells |
-| | SCAMPER (attribute ops) — *mutate a working strategy* | You have a working strategy and want disciplined variants, not a blank page |
-| **Cross-domain blend** | Conceptual blending — *fuse two edges into one with an emergent rule* | Two whole frameworks could fuse into one with an emergent rule neither parent has |
-| | Perspective shift / role-play — *trade the forced, price-insensitive counterparty* | Alpha = trading against someone with a *non-profit* objective (forced seller, rebalancer, de-risker) |
-| **Break defaults** | Reversal / Janusian — *attack the crowded default; invert the trade* | Surface the assumptions baked into a strategy and negate them; or reverse the trade |
-| | Subtraction / de-fixation — *strip to the load-bearing edge (attribution)* | Strip a "load-bearing" component to fight additive bias and overfit |
-| | TRIZ contradiction — *resolve a real tradeoff without compromise* | A real tension ("faster signal ↔ more cost") wants a non-compromise resolution |
-| **Iterate** | Generate–explore (Geneplore) — *grow a raw signal, then name its return source* | Build a rough un-named structure first, then interpret what it could proxy; loop |
+## Repo anchors — read what you need, don't hallucinate
 
-## Running a session
+- [`references/return_sources.md`](references/return_sources.md) — the return-source map. Anchor generation here; run the orthogonality check against it.
+- [`references/operators.md`](references/operators.md) — full operator playbook (read the families you'll use).
+- [`references/domain_seeds.md`](references/domain_seeds.md) — universes, loaders, signal/regime/portfolio/friction primitives, morphological matrix.
+- [`assets/idea_card.md`](assets/idea_card.md) — the output card format.
+- **What's already been tried** — before generating, learn the thread's prior art. If it has an
+  idea log / decision records (e.g. `docs/research_decisions/<thread>/idea_log.md`, `FINAL.md`),
+  skim them. **Most threads have none** — then reconstruct prior art from the topic folder's
+  notebook markdown + parameter cells (grep titles / headers / strategy parameter args rather than
+  reading each notebook in full). Re-proposing a rejected idea wastes a card; knowing what failed
+  *is* the orthogonality check in practice.
 
-Default flow when invoked. Keep it adaptive and keep the loops short — the research finding
-is that *short diverge → short reflect → diverge again* beats one long brainstorm followed by
-one big cull.
+If a referenced file is missing, say so in one line and proceed from the closest available
+context — never invent repo structure or fabricate a loader.
 
-1. **Frame.** Get the seed: a problem, an asset, a constraint, or an existing study to mutate.
-   If the user gave none, ask **one** scoping question, or default to the repo's most active
-   thread (currently the crypto-intraday work under `notebooks/90_crypto_intraday/`). Restate
-   the target as a *functional relation* ("concentrate signal X while limiting cost Y") — that
-   phrasing is what makes analogy and TRIZ work. Then **anchor it on the return-source map**
-   ([`references/return_sources.md`](references/return_sources.md)): which premium / anomaly / flow is in
-   play, how crowded is it, which loaders can test it? You generate by moving along that map.
-2. **Draw stimuli.** Run `scripts/random_stimulus.py` for genuinely random seeds (words,
-   analogy domains, a morphological cell, a primitive triple). Use the script rather than
-   picking your own — self-chosen "random" words are near-neighbours and kill the remote-
-   association effect. See [`references/domain_seeds.md`](references/domain_seeds.md) for the
-   primitive menu the matrix samples from.
-3. **Expand** with remote stimulus + structural analogy to pull the search space open.
-4. **Transform** with the morphological matrix + SCAMPER to enumerate structured variants.
-5. **Break defaults** with reversal, subtraction, and TRIZ — this is where most quant edge
-   hides, because the crowded version of every factor is the *default* one.
-6. **Blend & shift** with conceptual blending and counterparty role-play to synthesise the
-   more complex, higher-novelty ideas.
-7. **Reflect & filter.** After each round spend a moment sorting "has a mechanism" from
-   "noise", then regenerate seeded by the survivors. Apply the filter below, score, rank.
-8. **Output** 5–8 ranked idea cards. Offer to scaffold the top pick into a notebook.
+## Process — short loops beat one big brainstorm
 
-## The filter — what makes an idea "appropriate" here
+1. **Frame & anchor.** State the functional relation; locate it on the return-source map (which
+   premium / anomaly / flow, how crowded, which loader). Skim what's already been tried.
+2. **Draw stimuli.** Run [`scripts/random_stimulus.py`](scripts/random_stimulus.py) for genuinely
+   random seeds (via the project interpreter — on git-bash use a forward-slash exe path).
+   Self-picked "random" words are near-neighbours and kill the effect. Draws are *prompts, not
+   commitments* — discard any with no tradable mechanism; don't force a card from every cell.
+3. **Pick 3–5 operators** that fit the moment (table below). **Do not mechanically run all ten.**
+4. **Generate → reflect → regenerate.** After each short round, sort "has a mechanism" from
+   "noise", then generate again seeded by the survivors.
+5. **Filter, score, rank** → emit cards.
 
-Every surviving idea must clear these, or be explicitly flagged as failing one. This is the
-"persistence" half of creativity and it is non-negotiable for tradable research:
+## Operators — pick 3–5 (full playbook: [`references/operators.md`](references/operators.md))
 
-- **Mechanism.** Name the family it belongs to — trend, carry, mean-reversion, value,
-  seasonality, liquidity provision, behavioural, microstructure, regime, event/flow. "The
-  backtest looks good" is not a mechanism. If you can't articulate one, the card's verdict is
-  `reject` or `park`, exactly as in the notebook template.
-- **Return source & orthogonality.** Name which return source it harvests (see
-  [`references/return_sources.md`](references/return_sources.md)). If it's market beta or a known factor
-  — momentum, value, low-vol, carry — in its *crowded default* form, it isn't an idea yet: state the
-  **incremental** edge (the conditioner, horizon, universe, or flow that isn't already arbitraged), or
-  downgrade it. This is the check that separates a new hypothesis from a repackaged factor.
-- **Leak-safe / tradable.** The signal at time `t` uses only data with timestamp ≤ `t`, and
-  the trade happens after signal formation. (See `AGENTS.md` — no future information, trade
-  after signal.) If an idea needs forward returns to work, it is a diagnostic, not a strategy.
-- **Testable with available data.** Map it to a real loader: yfinance, FRED, Binance Vision,
-  Polymarket, or local. If the data doesn't exist yet, say what would be needed instead of
-  pretending it's runnable.
-- **Skeptic's view.** State the single strongest reason it won't work — crowding, costs,
-  capacity vs ADV, regime dependence, borrow/short availability. An idea with no stated
-  weakness hasn't been thought about.
-- **Cheapest first test.** Name the one experiment that would most quickly kill or confirm it.
-  Ideas are cheap; the deliverable is *what to run next*.
+Ten operators in five families (Expand search · Transform structure · Cross-domain blend ·
+Break defaults · Iterate). Diagnose what the moment needs and pull only the matching tools:
+
+| When you need to… | Reach for |
+|---|---|
+| Get unstuck fast / a fresh angle | Remote random stimulus · SCAMPER |
+| Cover a big design space systematically | Morphological recombination · TRIZ |
+| Break a crowded default assumption | Reversal · Subtraction · Perspective-shift (trade the forced counterparty) |
+| Synthesise a complex, high-novelty concept | Conceptual blending · Structural analogy · Generate-explore |
+
+Most quant edge hides under **Break defaults** — the crowded version of every factor *is* the
+default one. Read [`references/operators.md`](references/operators.md) for each operator's quant
+translation, a worked example from this repo, and its failure mode.
+
+## The filter — every card clears these, or is flagged as failing one
+
+- **Mechanism.** Name the family — trend / carry / mean-reversion / value / seasonality /
+  liquidity provision / behavioural / microstructure / regime / event-flow. "The backtest looks
+  good" is not a mechanism. No mechanism → verdict `park` or `reject`.
+- **Return source & orthogonality.** Name the source (`return_sources.md`). If it's beta or a
+  known factor (momentum / value / low-vol / carry) in its *crowded default* form, state the
+  **incremental** edge (conditioner / horizon / universe / flow) or downgrade it. Check it isn't
+  already in the thread's idea log.
+- **Leak-safe / tradable.** Signal at `t` uses only data timestamped ≤ `t`; trade *after* signal
+  formation (see `AGENTS.md`). If it needs forward returns, it's a diagnostic, not a strategy.
+- **Testable with available data.** Map to a real loader — yfinance / FRED / binance_vision /
+  polymarket / local. **Verify against the loader source, not an idea log's "deferred / needs
+  loader" label** (the data may already be loadable, or a "available" note may be stale). If the
+  data truly doesn't exist, say what's needed; don't fake it.
+- **Skeptic's view.** The single strongest reason it won't work — crowding, cost, capacity vs
+  ADV, regime dependence, borrow/short availability.
+- **Cheapest first test.** The one experiment that most quickly kills or confirms it. Ideas are
+  cheap; the deliverable is *what to run next*.
 
 ## Scoring & ranking
 
-Score each surviving idea 1–5 on four axes and rank by them. Show the scores on the card.
+Score each surviving idea 1–5 and rank by these axes (show them on the card):
 
-- **Novelty** — distance from the *crowded default* version of its return source (and from what this
-  repo already did). Repackaged beta or a textbook factor scores low.
+- **Novelty** — distance from the crowded default of its return source and from what this repo
+  already did. Repackaged beta or a textbook factor scores low.
 - **Mechanism plausibility** — how believable the economic story is.
 - **Testability** — how cheaply it can be tested with data on hand.
 - **Tradability** — prospects of surviving costs, capacity, and the no-lookahead rules.
 
-Alongside the scores, tag each card with a one-line **Crowding · Capacity · Regime** read — how
-arbitraged the source is, how much size it holds, which regimes it needs. These are the investment
-realities that decide whether a high-scoring idea survives contact.
+Anchor the endpoints so two sessions agree:
 
-Call out the two danger quadrants explicitly: **high-novelty / low-tradability** ("cool but
-probably untradeable" — park it honestly) and **high-tradability / low-novelty** ("a
-robustness sweep, not a new hypothesis"). The target zone is novel *and* plausibly tradable.
+- **Novelty** 5 = a new return source for this repo · 1 = a textbook factor in its crowded form.
+- **Mechanism** 5 = a specific, documented economic force · 1 = "the backtest looks good".
+- **Testability** 5 = runnable now from existing helpers · 1 = a data gap.
+- **Tradability** 5 = survives stress costs at usable capacity · 3 = moderate turnover / capacity drag but plausibly clears base costs · 1 = needs lookahead / infinite shorting / zero capacity.
 
-## Output: idea cards
+**Rank by target-zone fit** — the lead cards are the ones strong on novelty, mechanism, *and*
+tradability together (testability gates: an untestable idea can't lead). A tradable-but-unoriginal
+idea is a robustness sweep — flag it in the danger quadrant below, don't headline it.
 
-Emit ranked **idea cards** using [`assets/idea_card.md`](assets/idea_card.md). Default 5–8.
-Each card is a pre-filled stub of the notebook template's research-question + hypothesis cells,
-so a card drops straight into a study. Each card also names its **return-source family** and a
-**crowding / capacity / regime** tag, so the investment reality is visible at a glance. Tag each
-card's maturity, mapped to the repo's own verdict words so the handoff is seamless:
+Tag each card with a one-line **Crowding · Capacity · Regime** read. Call out the two danger
+quadrants explicitly: **high-novelty / low-tradability** ("cool but untradeable" — park it
+honestly) and **high-tradability / low-novelty** ("a robustness sweep, not a new hypothesis").
+The target zone is novel *and* plausibly tradable.
+
+## Output — idea cards
+
+Emit ranked cards using [`assets/idea_card.md`](assets/idea_card.md) (read it for the field list).
+**5–8 is a soft target — fewer genuinely strong cards beat padding;** surface near-misses (sweeps,
+already-claimed ideas) as one-line danger-quadrant callouts, not full cards. Tag each card's
+maturity (a one-word summary of the card, not a fifth score), mapped to the repo's verdict words:
 
 - **Raw** ↔ `park` — interesting, not yet shaped.
 - **Developing** ↔ `needs_revision` — promising; the next experiment is defined.
-- **Ready** ↔ `accept`-candidate — mechanism + test + data all line up; worth a notebook now.
+- **Ready** ↔ `accept`-candidate — mechanism, cheapest-test, and data all line up; worth a notebook
+  now (an open *empirical* question is what the notebook answers — that's expected, not a blocker).
+
+If `idea_card.md` is unavailable, fall back to these fields per card: title · operator(s) ·
+research question · mechanism · return source & orthogonality · signal sketch (leak-safe) ·
+universe & data · portfolio/trade · skeptic's view · cheapest first test · crowding·capacity·regime ·
+scores · maturity · next step.
 
 ## Handoff & persistence
 
-- To act on a card: create a notebook under the right topic folder from
-  `notebooks/_templates/strategy_research_template.md`, copying the card into the
-  research-question and hypothesis cells. Offer to scaffold this for the top-ranked idea.
-- To save a session: only if asked, write the card set to a backlog (e.g.
-  `docs/idea_backlog.md`) or drop the strongest as `park`-status stubs under
-  `docs/research_decisions/`. Don't auto-create files otherwise — keep the session in-chat.
+- **Act on a card:** create a notebook from `notebooks/_templates/strategy_research_template.md`
+  under the right topic folder, copying the card into the research-question and hypothesis cells.
+  Offer to scaffold this for the top-ranked idea.
+- **Save a session** *only if asked:* write the card set to `docs/idea_backlog.md`, or drop the
+  strongest as `park`-status stubs under `docs/research_decisions/`. Don't auto-create files
+  otherwise — keep the session in-chat.
 
 ## Anti-patterns
 
-- **Dumping 30 vague ideas.** Structured operators + a hard filter beat volume. Quality of the
-  *filter* is the product.
-- **Data mining in a creativity costume.** Novelty with no mechanism. The filter exists to catch
-  exactly this.
-- **Fake-random stimulus.** Hand-picking "random" words pulls toward near-neighbours. Use the
-  script.
-- **Stopping at a clever tweak.** "6-1 instead of 12-1 momentum" is a parameter sweep. Push the
-  operator further — combine across SCAMPER verbs, or break a default.
+- **Dumping many vague ideas.** Operators + a hard filter beat volume. The filter is the product.
+- **Data mining in a creativity costume.** Novelty with no mechanism.
+- **Re-proposing what the idea log already rejected.** Check first.
+- **Fake-random stimulus.** Hand-picked "random" words pull to near-neighbours — use the script.
+- **Stopping at a parameter tweak.** "6-1 instead of 12-1 momentum" is a sweep; push the operator
+  further (combine across SCAMPER verbs, or break a default).
 - **Untradeable beauty.** Elegant ideas that need lookahead, infinite shorting, or zero capacity.
-  Tradability is a scored axis for this reason.
-
-## Bundled resources
-
-- [`references/operators.md`](references/operators.md) — the ten operators, each translated to
-  quant research with prompts, a worked example from this repo, and its failure mode. Read at
-  session start.
-- [`references/domain_seeds.md`](references/domain_seeds.md) — the raw material: this repo's
-  universes, data loaders, signal/portfolio/regime/friction primitives, and the strategy
-  morphological matrix. Grounds the combinatorial operators in what alpha_lab can actually test.
-- [`references/return_sources.md`](references/return_sources.md) — the taxonomy of real return sources
-  (risk premia, anomalies, flow, microstructure, macro/regime), each with mechanism, crowding, capacity,
-  and which loader can test it. Anchor generation here; run the orthogonality check against it.
-- [`assets/idea_card.md`](assets/idea_card.md) — the idea-card output template, with a worked
-  example.
-- [`scripts/random_stimulus.py`](scripts/random_stimulus.py) — genuinely random draws (words,
-  analogy domains, morphological cells, primitive triples) to seed the expand/iterate steps.
-  Run with the project interpreter (see `CLAUDE.md` / `AGENTS.md`); stdlib-only, no deps.
