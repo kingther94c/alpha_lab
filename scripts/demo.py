@@ -37,8 +37,12 @@ def _port_open(port: int, host: str = "127.0.0.1") -> bool:
         return s.connect_ex((host, port)) == 0
 
 
-def _detached_kwargs() -> dict:
-    kw: dict = dict(cwd=str(ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True,
+def _detached_kwargs(log_path: Path | None = None) -> dict:
+    # Detached children outlive this script; send their output to a log file (not DEVNULL) so a
+    # crash-on-launch leaves a trace. ``None`` keeps DEVNULL for callers that don't want a log.
+    out = open(log_path, "ab", buffering=0) if log_path is not None else subprocess.DEVNULL
+    err = subprocess.STDOUT if log_path is not None else subprocess.DEVNULL
+    kw: dict = dict(cwd=str(ROOT), stdout=out, stderr=err, close_fds=True,
                     env={**os.environ, "PYTHONPATH": str(ROOT / "src") + os.pathsep + os.environ.get("PYTHONPATH", "")})
     if os.name == "nt":
         kw["creationflags"] = 0x00000008 | subprocess.CREATE_NEW_PROCESS_GROUP   # DETACHED_PROCESS
@@ -50,13 +54,13 @@ def _detached_kwargs() -> dict:
 def _start_ui(port: int) -> str:
     if _port_open(port):
         return f"UI: already serving on :{port} (left as-is)"
+    pf = _pidfile(port)
+    pf.parent.mkdir(parents=True, exist_ok=True)   # ensure the run dir exists before opening the ui log
     p = subprocess.Popen(
         [sys.executable, "-m", "streamlit", "run", str(UI_APP),
          "--server.headless", "true", "--server.port", str(port),
          "--browser.gatherUsageStats", "false"],
-        **_detached_kwargs())
-    pf = _pidfile(port)
-    pf.parent.mkdir(parents=True, exist_ok=True)
+        **_detached_kwargs(pf.parent / f"ui_{port}.log"))
     pf.write_text(str(p.pid))
     for _ in range(20):
         if _port_open(port):

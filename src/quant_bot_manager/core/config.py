@@ -29,7 +29,7 @@ def paths(bot: str = DEFAULT_BOT) -> dict:
     """Canonical paths for a bot's run dir. ``db`` is the live store; the CSV/JSON keys are
     legacy flat files kept only so the store can import pre-SQLite history once."""
     d = run_dir(bot)
-    return {"dir": d, "db": d / "bot.db",
+    return {"dir": d, "db": d / "bot.db", "log": d / "run.log",
             "equity": d / "equity_log.csv", "rebalance": d / "rebalance_log.csv",
             "state": d / "state.json", "config": d / "config.json", "status": d / "status.json"}
 

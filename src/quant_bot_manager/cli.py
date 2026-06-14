@@ -15,7 +15,8 @@ import os
 
 from quant_bot_manager.core import config, runner
 from quant_bot_manager.core.registry import get_bot, list_bots
-from quant_bot_manager.core.schema import DEFAULTS
+from quant_bot_manager.core.schema import DEFAULTS, BotConfig
+from quant_bot_manager.core.store import Store
 
 
 def _common(p):
@@ -69,9 +70,16 @@ def main():
                    interval_min=args.interval_min, max_cycles=args.max_cycles)
     elif args.cmd == "rebalance":
         bot.broker.connect()
+        # Same store-aware path as the runner loop, so a manual rebalance honors the kill-switch
+        # (halt / paused / latched auto-halt) read fresh from the bot's store.
+        # Precedence is store > these flags > YAML defaults (the store is a managed bot's live truth;
+        # the cockpit's "Rebalance now" passes UI=store config anyway), so a re-tuned/halted bot wins.
+        cfg = BotConfig.from_dict({**(bot.default_config or BotConfig()).to_dict(),
+                                   "capital": args.capital, "method": args.method, "max_gross": args.max_gross})
         placed, asof, gross, status = runner.rebalance_once(
-            bot, args.capital, args.method, args.max_gross, from_flat=args.from_flat)
-        print(f"[{args.mode}] rebalance {status}: {len(placed)} orders (asof {str(asof)[:10]}, gross {gross:.2f}x)")
+            bot, cfg, store=Store(args.bot), from_flat=args.from_flat)
+        asof_s = str(asof)[:10] if asof else "—"
+        print(f"[{args.mode}] rebalance {status}: {len(placed)} orders (asof {asof_s}, gross {gross:.2f}x)")
         for v, s, sy, a in placed:
             print(f"  {v} {s} {sy} {a}")
 

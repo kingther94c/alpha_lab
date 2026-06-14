@@ -16,6 +16,7 @@ legacy import.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import sqlite3
 from contextlib import contextmanager
@@ -41,6 +42,25 @@ def _f(x) -> float | None:
         return float(x)
     except (TypeError, ValueError):
         return None
+
+
+_LOCK_KEY = "rebalance_lock"
+
+
+def _is_stale(held_ts, now_iso: str, stale_after_s: float) -> bool:
+    """True if a lock timestamp is missing or old enough to steal (a crashed holder must not deadlock).
+    Naive/aware timestamps are normalized to UTC so a mixed pair can't raise and wrongly steal a live lock."""
+    if not held_ts:
+        return True
+    try:
+        held, now = dt.datetime.fromisoformat(held_ts), dt.datetime.fromisoformat(now_iso)
+        if held.tzinfo is None:
+            held = held.replace(tzinfo=dt.UTC)
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=dt.UTC)
+        return (now - held).total_seconds() > stale_after_s
+    except (ValueError, TypeError):
+        return True
 
 
 class Store:
@@ -102,6 +122,53 @@ class Store:
         with self._cx() as c:
             rows = c.execute("SELECT total FROM equity ORDER BY rowid").fetchall()
         return [float(r[0]) for r in rows if r[0] is not None]
+
+    def first_equity_ts(self):
+        """ISO timestamp of the earliest mark (when this capital was first deployed) — used to accrue the
+        cost-of-cash hurdle across restarts. None if no equity yet."""
+        with self._cx() as c:
+            row = c.execute("SELECT ts FROM equity ORDER BY rowid LIMIT 1").fetchone()
+        return row[0] if row else None
+
+    # -- de-faucet (honest strategy equity for the drawdown kill-switch) ----
+    def get_faucet_offset(self):
+        """Free demo-faucet cash that isn't strategy capital (total_at_first_mark - capital); set once."""
+        return self.get_kv("faucet_offset")
+
+    def set_faucet_offset(self, value: float) -> None:
+        self.set_kv("faucet_offset", float(value))
+
+    def all_strategy_equity(self) -> list[float]:
+        """De-fauceted equity path = raw total - faucet offset. The drawdown kill-switch reads THIS so a
+        demo faucet top-up can't inflate the denominator and hide a real strategy drawdown."""
+        off = self.get_faucet_offset() or 0.0
+        return [t - off for t in self.all_equity_totals()]
+
+    # -- single-flight rebalance lock (cross-process advisory) -------------
+    def try_claim_rebalance_lock(self, owner: str, now_iso: str, stale_after_s: float = 600.0) -> bool:
+        """Atomically claim the per-bot rebalance lock so the runner loop and a manual rebalance can't
+        execute concurrently. True if acquired (no fresh holder); False if another process holds it. A
+        stale lock (holder older than ``stale_after_s`` — e.g. a crashed process) is stolen. Uses
+        BEGIN IMMEDIATE on a dedicated autocommit connection so the check-and-set has no cross-process race."""
+        c = sqlite3.connect(self.path, timeout=10, isolation_level=None)
+        try:
+            c.execute("PRAGMA busy_timeout=5000")
+            c.execute("BEGIN IMMEDIATE")
+            row = c.execute("SELECT value FROM kv WHERE key=?", (_LOCK_KEY,)).fetchone()
+            if row and not _is_stale(json.loads(row[0]).get("ts"), now_iso, stale_after_s):
+                c.execute("ROLLBACK")
+                return False
+            c.execute("INSERT INTO kv(key, value) VALUES (?, ?) "
+                      "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                      (_LOCK_KEY, json.dumps({"owner": owner, "ts": now_iso})))
+            c.execute("COMMIT")
+            return True
+        finally:
+            c.close()
+
+    def release_rebalance_lock(self) -> None:
+        with self._cx() as c:
+            c.execute("DELETE FROM kv WHERE key=?", (_LOCK_KEY,))
 
     # -- rebalances --------------------------------------------------------
     def append_rebalance(self, ts: str, signal_asof: str, gross: float, status: str,

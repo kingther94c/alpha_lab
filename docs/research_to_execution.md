@@ -153,6 +153,9 @@ The UI never imports trading code — it reads the bot's SQLite store and drives
 ### 4e. State & monitoring
 All runtime state is one SQLite DB per bot: `data/results/bots/<bot>/bot.db` (equity, rebalances,
 status, config — WAL mode, safe for concurrent UI reads). Pre-SQLite CSV/JSON is auto-imported once.
+The status blob reports `strategy_equity` (de-fauceted — demo faucet cash removed) and `excess_equity`
+(net of the risk-free cost-of-cash hurdle), so performance is judged **excess-of-cash** (guardrail #2),
+not of zero. The drawdown kill-switch fires on `strategy_equity` (capital preservation), not the hurdle.
 
 ### 4f. Keep it running 24/7
 Register a Windows Task Scheduler job at startup (see `notebooks/90_crypto_intraday/PAPER_TRADING.md`),

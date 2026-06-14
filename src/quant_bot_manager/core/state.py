@@ -68,16 +68,23 @@ def _cli(*cmd):
 
 
 def start_bot(cfg: dict, bot: str = config.DEFAULT_BOT) -> str:
+    if is_running(bot):                                 # single-flight: never run two loops on one bot/account
+        return f"already running (pid {read_status(bot).get('pid')})"
     write_config({**cfg, "paused": False}, bot)
     flags = 0
     if os.name == "nt":
         flags = 0x00000008 | subprocess.CREATE_NEW_PROCESS_GROUP   # DETACHED_PROCESS
+    # Route the detached child's stdout+stderr to the bot's run.log so a crash-on-launch (e.g. a
+    # missing BINANCE_DEMO_KEY, an import/ccxt failure) leaves a trace instead of vanishing into
+    # DEVNULL. Unbuffered append; the child inherits its own handle, so the parent dropping this
+    # reference after Popen returns does not close the child's stream.
+    log = open(config.paths(bot)["log"], "ab", buffering=0)
     subprocess.Popen(
         _cli("run", "--bot", bot, "--mode", "demo", "--capital", str(cfg["capital"]),
              "--method", cfg["method"], "--max-gross", str(cfg["max_gross"]),
              "--interval-min", str(cfg["interval_min"])),
         cwd=str(config.ROOT), env=_ENV, creationflags=flags,
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
+        stdout=log, stderr=subprocess.STDOUT, close_fds=True)
     return "start requested"
 
 

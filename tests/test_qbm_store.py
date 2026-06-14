@@ -49,3 +49,29 @@ def test_empty_reads(tmp_path):
     assert len(s.read_equity_df()) == 0
     assert len(s.read_rebalances_df()) == 0
     assert s.read_status() == {}
+
+
+def test_strategy_equity_defaucets(tmp_path):
+    # demo faucet funded 100k; bot capital 10k -> offset 90k of un-allocated faucet cash
+    s = Store("t", path=tmp_path / "df.db")
+    assert s.get_faucet_offset() is None
+    s.set_faucet_offset(90_000.0)
+    s.append_equity("t0", 100_000, 0, 0)
+    s.append_equity("t1", 97_500, 0, 0)                       # strategy lost 2.5k of its 10k
+    assert s.all_strategy_equity() == [10_000.0, 7_500.0]     # de-fauceted to capital + PnL
+    assert s.all_equity_totals() == [100_000.0, 97_500.0]     # raw total unchanged
+
+
+def test_rebalance_lock_is_single_flight(tmp_path):
+    s = Store("t", path=tmp_path / "lock.db")
+    assert s.try_claim_rebalance_lock("pid1", "2026-06-14T00:00:00") is True    # acquired
+    s2 = Store("t", path=tmp_path / "lock.db")                                  # another "process", same db
+    assert s2.try_claim_rebalance_lock("pid2", "2026-06-14T00:00:01") is False  # fresh holder -> refused
+    s.release_rebalance_lock()
+    assert s2.try_claim_rebalance_lock("pid2", "2026-06-14T00:00:02") is True    # released -> acquirable
+
+
+def test_rebalance_lock_steals_a_stale_holder(tmp_path):
+    s = Store("t", path=tmp_path / "lk.db")
+    assert s.try_claim_rebalance_lock("dead", "2026-06-14T00:00:00") is True
+    assert s.try_claim_rebalance_lock("new", "2026-06-14T00:11:00") is True      # 11 min later > 600s -> steal
