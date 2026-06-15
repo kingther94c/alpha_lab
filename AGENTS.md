@@ -49,6 +49,24 @@ in skills; *ephemeral research knobs* live in notebook cells — keep each in on
 - **Playwright/browser skills**: use only for browser automation, web-app verification, or inspecting pages that cannot be handled with normal HTTP/data loaders. Do not use browser automation for ordinary notebook or pandas debugging.
 - **Notebook/research work**: no special external skill is required by default. Keep notebooks thin, clear outputs before commits, and move reusable data loading, optimization, analytics, and backtest logic into `src/alpha_lab/`.
 
+## Team development mode (optional, opt-in)
+
+For a substantial study or execution-leg change you can run a cross-functional **team** instead of solo —
+four project-tuned roles in `.claude/agents/`, each a concentrated project checklist + an adversarial mandate
+(not persona role-play):
+
+- `research-lead` — question / mechanism / holdout discipline / go-no-go + decision record (PM for product work).
+- `quant-skeptic` — leakage · cost-of-cash · full-sample stats · "is this Sharpe believable" (cardinal-sin guardian; read-only).
+- `engineer` — build + right-submodule placement + small/typed/tested, don't-overengineer, two-leg decoupling.
+- `execution-safety` — real-money gates for `quant_bot_manager` (never-auto-live, kill-switch, demo default, secrets/raw hygiene; read-only).
+
+- **Trigger:** `/team <task>` (runs the `product-team` workflow in `.claude/workflows/`), or just ask for "the team".
+- **When:** a too-good backtest, a risky execution-leg change, a broad audit, a wide design space — where independent
+  adversarial perspectives earn their token cost. The biggest real win is no author-bias when reviewing your own risky
+  code. **Don't** fan out for trivial or conversational work — do those solo.
+- Each role file is a **living checklist**: when a lens misses something, edit its `.md` so it catches it next time.
+  Per-role `tools` and `model` are tunable (e.g. `engineer` runs on a cheaper model by default).
+
 ## Making changes
 
 - Keep each change focused. If you spot unrelated issues, note them in your summary rather than fixing them inline.
