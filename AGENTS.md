@@ -61,9 +61,15 @@ four project-tuned roles in `.claude/agents/`, each a concentrated project check
 - `execution-safety` — real-money gates for `quant_bot_manager` (never-auto-live, kill-switch, demo default, secrets/raw hygiene; read-only).
 
 - **Trigger:** `/team <task>` (runs the `product-team` workflow in `.claude/workflows/`), or just ask for "the team".
-- **When:** a too-good backtest, a risky execution-leg change, a broad audit, a wide design space — where independent
-  adversarial perspectives earn their token cost. The biggest real win is no author-bias when reviewing your own risky
-  code. **Don't** fan out for trivial or conversational work — do those solo.
+- **Default is still solo + the checklist.** The cheap ~80%: apply the four role `.md` files as a *standing
+  checklist* in the main loop — no extra agents. Reserve the real parallel fan-out for the two cases where
+  independence from the author actually earns its cost (fan-out is also rate-limit-fragile, ~9 agents/feature):
+    - a result/backtest that looks **too good** → `quant-skeptic` (leakage, cost-of-cash, full-sample, survivorship);
+    - an **execution-leg change near money/gates** → `execution-safety` (never-auto-live, kill-switch, de-faucet).
+  These are exactly where solo has slipped before — the P7 **cost-of-cash** miss (a written non-negotiable) was
+  caught by the user, not the author. **Don't** fan out for trivial / conversational / well-specified mechanical
+  work — solo is better there. (Validated by a 2026-06 solo-vs-tuned-team-vs-generic-team A/B/C experiment; the
+  generic-team arm confirms a non-tuned reviewer misses this repo's cardinal sins, so keep the lenses project-tuned.)
 - Each role file is a **living checklist**: when a lens misses something, edit its `.md` so it catches it next time.
   Per-role `tools` and `model` are tunable (e.g. `engineer` runs on a cheaper model by default).
 
