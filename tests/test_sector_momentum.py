@@ -94,3 +94,30 @@ def test_express_leveraged_etf_requires_available_tickers():
 
     with pytest.raises(ValueError, match="missing inverse_3x_etf"):
         express_sector_views(views, universe, mode="leveraged_etf", leverage=3)
+
+
+def test_top_bottom_view_weights_sparse_row_keeps_long_and_short_disjoint():
+    # Only 5 valid names but top_n + bottom_n = 6, so the middle name (C) lands in
+    # both the top-3 and bottom-3 rank sets. The long side must take priority; C
+    # stays long and is not overwritten into a short.
+    signal = pd.DataFrame(
+        [[5.0, 4.0, 3.0, 2.0, 1.0]],
+        index=[pd.Timestamp("2024-01-31")],
+        columns=list("ABCDE"),
+    )
+
+    weights = top_bottom_view_weights(signal, top_n=3, bottom_n=3)
+    row = weights.loc["2024-01-31"]
+
+    longs = row[row > 0]
+    shorts = row[row < 0]
+
+    # No name is simultaneously long and short.
+    assert set(longs.index).isdisjoint(shorts.index)
+    assert list(longs.index) == ["A", "B", "C"]
+    assert list(shorts.index) == ["D", "E"]
+
+    # Long side keeps its full intended gross; each leg carries the per-name weight.
+    assert longs.sum() == pytest.approx(1.0)
+    assert longs.tolist() == pytest.approx([1 / 3, 1 / 3, 1 / 3])
+    assert shorts.tolist() == pytest.approx([-1 / 3, -1 / 3])

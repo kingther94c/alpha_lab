@@ -33,17 +33,25 @@ def top_bottom_view_weights(
     long_gross: float = 1.0,
     short_gross: float = 1.0,
 ) -> pd.DataFrame:
-    """Convert row-wise scores into long-top and short-bottom ETF view weights."""
+    """Convert row-wise scores into long-top and short-bottom ETF view weights.
+
+    Long and short selections are kept mutually exclusive: when a row has fewer
+    than ``top_n + bottom_n`` valid names, the long (top) side takes priority and
+    the short side is truncated, so a name is never both long and short.
+    """
     if top_n < 1 or bottom_n < 1:
         raise ValueError("top_n and bottom_n must be >= 1")
 
     ranks_high = signal.rank(axis=1, ascending=False, method="first")
     ranks_low = signal.rank(axis=1, ascending=True, method="first")
 
-    weights = pd.DataFrame(0.0, index=signal.index, columns=signal.columns)
     valid = signal.notna()
-    weights = weights.mask((ranks_high <= top_n) & valid, long_gross / top_n)
-    weights = weights.mask((ranks_low <= bottom_n) & valid, -short_gross / bottom_n)
+    is_long = (ranks_high <= top_n) & valid
+    is_short = (ranks_low <= bottom_n) & (ranks_high > top_n) & valid
+
+    weights = pd.DataFrame(0.0, index=signal.index, columns=signal.columns)
+    weights = weights.mask(is_long, long_gross / top_n)
+    weights = weights.mask(is_short, -short_gross / bottom_n)
     return weights.where(valid, 0.0)
 
 
