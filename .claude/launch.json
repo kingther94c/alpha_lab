@@ -10,6 +10,12 @@
         "--browser.gatherUsageStats", "false"
       ],
       "port": 8501
+    },
+    {
+      "name": "report-preview",
+      "runtimeExecutable": "D:/conda/envs/py313/python.exe",
+      "runtimeArgs": ["-m", "http.server", "8899", "--directory", "reports"],
+      "port": 8899
     }
   ]
 }
