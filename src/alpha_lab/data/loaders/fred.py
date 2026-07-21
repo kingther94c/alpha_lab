@@ -113,8 +113,9 @@ def cash_total_return_index(
 ) -> pd.Series:
     """Build a cash total-return index from a T-bill discount-rate series.
 
-    Accrual is applied between observed dates as ``day_diff * today_daily_rate``
-    so weekends and holidays are carried by the next available observation.
+    Accrual is applied between observed dates using the previously available
+    rate. This avoids using a newly published observation to price an interval
+    that ended before the observation was known.
     The first valid date starts at ``base``.
     """
     daily_rate = discount_rate_to_daily_rate(discount_rate, maturity_days=maturity_days).dropna()
@@ -122,7 +123,7 @@ def cash_total_return_index(
         return pd.Series(dtype=float, name="Cash_TR")
 
     day_diff = daily_rate.index.to_series().diff().dt.days.fillna(0.0)
-    accrual = 1.0 + daily_rate * day_diff
+    accrual = (1.0 + daily_rate.shift(1).fillna(0.0)) ** day_diff
     index = accrual.cumprod() * base
     index.iloc[0] = base
     return index.rename("Cash_TR")

@@ -85,7 +85,7 @@ def test_discount_rate_to_daily_rate_converts_bank_discount_quote():
     assert daily.iloc[0] == pytest.approx(expected)
 
 
-def test_cash_total_return_index_accrues_calendar_day_gaps_with_today_rate():
+def test_cash_total_return_index_accrues_calendar_day_gaps_with_previous_rate():
     idx = pd.to_datetime(["2024-01-02", "2024-01-03", "2024-01-08"])
     rates = pd.Series([3.0, 4.0, 5.0], index=idx, name="DTB3")
 
@@ -93,5 +93,5 @@ def test_cash_total_return_index_accrues_calendar_day_gaps_with_today_rate():
     daily = discount_rate_to_daily_rate(rates, maturity_days=91)
 
     assert tr.iloc[0] == pytest.approx(100.0)
-    assert tr.iloc[1] == pytest.approx(100.0 * (1.0 + daily.iloc[1] * 1))
-    assert tr.iloc[2] == pytest.approx(tr.iloc[1] * (1.0 + daily.iloc[2] * 5))
+    assert tr.iloc[1] == pytest.approx(100.0 * (1.0 + daily.iloc[0]) ** 1)
+    assert tr.iloc[2] == pytest.approx(tr.iloc[1] * (1.0 + daily.iloc[1]) ** 5)

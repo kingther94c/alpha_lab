@@ -1,0 +1,14 @@
+{
+  "common_start": "2008-05-01",
+  "end": "2021-12-31",
+  "frozen_rule": "both HYG/IEF and SPY above trailing 200d MA, weekly",
+  "static_average_weights": {
+    "SPY": 0.4445977345338368,
+    "QQQ": 0.14819924484461225,
+    "HYG": 0.0,
+    "IEF": 0.20360151031077547,
+    "GLD": 0.10180075515538774,
+    "SHY": 0.10180075515538774
+  },
+  "post_selection_warning": "Sensitivity winners cannot replace the frozen rule."
+}

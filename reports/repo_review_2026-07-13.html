@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>alpha_lab 深度仓库审查报告 — 2026-07-13</title>
+  <style>
+    :root {
+      --ink: #10243e;
+      --muted: #5d6c80;
+      --line: #dce4ed;
+      --paper: #ffffff;
+      --wash: #f4f7fa;
+      --navy: #0b2b4c;
+      --blue: #1769aa;
+      --cyan: #e8f5fb;
+      --green: #167a55;
+      --green-bg: #eaf7f1;
+      --amber: #a85d00;
+      --amber-bg: #fff5df;
+      --red: #b42318;
+      --red-bg: #fff0ee;
+      --purple: #6941c6;
+      --purple-bg: #f3efff;
+      --shadow: 0 8px 28px rgba(16, 36, 62, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--wash);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+      line-height: 1.62;
+    }
+    a { color: var(--blue); text-underline-offset: 2px; }
+    code {
+      padding: 0.08em 0.35em;
+      border-radius: 5px;
+      background: #edf2f7;
+      color: #17395d;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      overflow: auto;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #20344d;
+      font: 13px/1.55 Consolas, "SFMono-Regular", monospace;
+      white-space: pre-wrap;
+    }
+    h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.018em; }
+    h2 { margin: 0 0 8px; font-size: 28px; }
+    h3 { margin: 0 0 8px; font-size: 20px; }
+    h4 { margin: 0 0 6px; font-size: 16px; }
+    p { margin: 0 0 12px; }
+
+    .hero {
+      color: white;
+      background:
+        radial-gradient(circle at 86% 18%, rgba(78, 191, 232, 0.28), transparent 26%),
+        linear-gradient(125deg, #071d35 0%, #0b335b 62%, #0d4772 100%);
+      padding: 56px 28px 48px;
+    }
+    .hero-inner { max-width: 1220px; margin: 0 auto; }
+    .eyebrow {
+      margin-bottom: 12px;
+      color: #a8dbf3;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      max-width: 900px;
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 54px);
+    }
+    .hero .lede {
+      max-width: 900px;
+      margin-bottom: 22px;
+      color: #d5e8f5;
+      font-size: 18px;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .hero-meta span {
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .side {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      overflow: auto;
+      padding: 28px 20px;
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(8px);
+    }
+    .side strong {
+      display: block;
+      margin: 0 8px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .side a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #31445b;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .side a:hover, .side a:focus { background: #edf4fa; color: var(--blue); }
+    .side .quick-action {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    button {
+      cursor: pointer;
+      border: 1px solid #b9c9d8;
+      border-radius: 8px;
+      background: white;
+      color: var(--ink);
+      padding: 8px 11px;
+      font: inherit;
+      font-size: 13px;
+    }
+    button:hover { border-color: var(--blue); color: var(--blue); }
+
+    main {
+      min-width: 0;
+      max-width: 1180px;
+      padding: 38px 42px 72px;
+    }
+    section {
+      scroll-margin-top: 20px;
+      margin-bottom: 56px;
+    }
+    .section-intro {
+      max-width: 900px;
+      margin-bottom: 22px;
+      color: var(--muted);
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .padded { padding: 22px; }
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .verdict {
+      padding: 24px;
+      border: 2px solid #efb1aa;
+      border-radius: var(--radius);
+      background: linear-gradient(120deg, #fff8f7, #fff);
+      box-shadow: var(--shadow);
+    }
+    .verdict-line {
+      margin-bottom: 10px;
+      color: var(--red);
+      font-size: 25px;
+      font-weight: 850;
+      line-height: 1.3;
+    }
+    .verdict p { max-width: 920px; }
+
+    .health {
+      min-height: 154px;
+      padding: 18px;
+    }
+    .health .label { color: var(--muted); font-size: 12px; font-weight: 750; }
+    .health .grade { margin: 8px 0 6px; font-size: 21px; font-weight: 850; }
+    .health small { display: block; color: var(--muted); line-height: 1.5; }
+    .grade.good { color: var(--green); }
+    .grade.warn { color: var(--amber); }
+    .grade.stop { color: var(--red); }
+
+    .badge, .status {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .critical { color: var(--red); background: var(--red-bg); }
+    .high { color: #9b3b00; background: #fff0df; }
+    .medium { color: var(--amber); background: var(--amber-bg); }
+    .low { color: var(--blue); background: var(--cyan); }
+    .go { color: var(--green); background: var(--green-bg); }
+    .conditional { color: var(--amber); background: var(--amber-bg); }
+    .stop { color: var(--red); background: var(--red-bg); }
+    .info { color: var(--purple); background: var(--purple-bg); }
+
+    .decision-table, .evidence-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: white;
+      box-shadow: var(--shadow);
+    }
+    .decision-table th, .decision-table td,
+    .evidence-table th, .evidence-table td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    .decision-table th, .evidence-table th {
+      color: #40546c;
+      background: #eef3f7;
+      font-size: 12px;
+      letter-spacing: 0.025em;
+    }
+    .decision-table tr:last-child td, .evidence-table tr:last-child td { border-bottom: 0; }
+
+    .priority {
+      overflow: hidden;
+      border-left: 5px solid var(--red);
+    }
+    .priority-head {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 22px 12px;
+    }
+    .priority-body { padding: 0 22px 20px; }
+    .priority-body p:last-child { margin-bottom: 0; }
+    .evidence {
+      margin: 13px 0;
+      padding: 12px 14px;
+      border-left: 3px solid #89abc5;
+      background: #f5f9fc;
+      color: #354b63;
+      font-size: 13px;
+    }
+    .acceptance {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--green-bg);
+      color: #225c47;
+      font-size: 13px;
+    }
+
+    .strength {
+      padding: 19px;
+      border-top: 4px solid var(--green);
+    }
+    .strength p { color: var(--muted); font-size: 14px; }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 18px 0 26px;
+    }
+    .pipeline div {
+      position: relative;
+      padding: 14px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+    .pipeline div:not(:last-child)::after {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      right: -10px;
+      content: "›";
+      transform: translateY(-52%);
+      color: var(--blue);
+      font-size: 23px;
+      font-weight: 900;
+    }
+    .pipeline .broken { border-color: #e8a49c; background: var(--red-bg); color: var(--red); }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .filters button.active { border-color: var(--blue); background: var(--blue); color: white; }
+    .findings { display: grid; gap: 11px; }
+    details.finding {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-left: 5px solid #9db1c3;
+      border-radius: 11px;
+      background: white;
+      box-shadow: 0 4px 16px rgba(16,36,62,0.045);
+    }
+    details.finding[data-level="critical"] { border-left-color: var(--red); }
+    details.finding[data-level="high"] { border-left-color: #d05a0a; }
+    details.finding[data-level="medium"] { border-left-color: #d49116; }
+    details.finding[data-level="low"] { border-left-color: var(--blue); }
+    details.finding summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 11px;
+      align-items: center;
+      padding: 15px 17px;
+      cursor: pointer;
+      list-style: none;
+    }
+    details.finding summary::-webkit-details-marker { display: none; }
+    details.finding summary::after { content: "＋"; color: var(--muted); font-weight: 800; }
+    details.finding[open] summary::after { content: "－"; }
+    .finding-title { font-weight: 800; }
+    .finding-body {
+      padding: 0 18px 18px 52px;
+      border-top: 1px solid #edf1f5;
+    }
+    .finding-body dl {
+      display: grid;
+      grid-template-columns: 90px minmax(0,1fr);
+      gap: 7px 12px;
+      margin: 16px 0 0;
+      font-size: 14px;
+    }
+    .finding-body dt { color: var(--muted); font-weight: 750; }
+    .finding-body dd { margin: 0; }
+    .hidden { display: none !important; }
+
+    .roadmap {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      padding-left: 30px;
+    }
+    .roadmap::before {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 10px;
+      width: 3px;
+      content: "";
+      background: #bed1df;
+    }
+    .phase {
+      position: relative;
+      padding: 21px;
+    }
+    .phase::before {
+      position: absolute;
+      top: 25px;
+      left: -27px;
+      width: 15px;
+      height: 15px;
+      border: 4px solid var(--wash);
+      border-radius: 50%;
+      background: var(--blue);
+      content: "";
+    }
+    .phase ul, .feature ul, .compact-list { margin: 9px 0 0; padding-left: 20px; }
+    .phase li, .feature li, .compact-list li { margin: 5px 0; }
+
+    .feature {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .feature .feature-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+    .feature .why { color: var(--muted); font-size: 14px; }
+    .feature .feature-end {
+      margin-top: auto;
+      padding-top: 13px;
+      color: #36536d;
+      font-size: 13px;
+    }
+
+    .metric {
+      padding: 18px;
+      text-align: center;
+    }
+    .metric b { display: block; color: var(--navy); font-size: 27px; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .note {
+      padding: 15px 17px;
+      border: 1px solid #c9d9e6;
+      border-radius: 10px;
+      background: #f3f8fc;
+      color: #365069;
+      font-size: 14px;
+    }
+    .warning-note {
+      border-color: #efc27b;
+      background: var(--amber-bg);
+      color: #76500c;
+    }
+    .stop-note {
+      border-color: #e6a49c;
+      background: var(--red-bg);
+      color: #7b2d25;
+    }
+    .source-kind {
+      display: inline-block;
+      margin-right: 5px;
+      padding: 1px 6px;
+      border: 1px solid #c8d7e4;
+      border-radius: 4px;
+      color: #49667e;
+      background: white;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    footer {
+      padding: 30px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: white;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1050px) {
+      .layout { grid-template-columns: 1fr; }
+      .side { position: static; width: 100%; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .side a { display: inline-block; }
+      .side .quick-action { display: inline-block; margin: 0 0 0 8px; padding: 0; border: 0; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      main { padding: 28px 18px 56px; }
+      .hero { padding: 42px 20px 36px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .pipeline { grid-template-columns: 1fr; }
+      .pipeline div:not(:last-child)::after { top: auto; right: 50%; bottom: -19px; transform: rotate(90deg); }
+      .decision-table, .decision-table tbody, .decision-table tr, .decision-table td {
+        display: block;
+      }
+      .decision-table thead { display: none; }
+      .decision-table tr { padding: 10px; border-bottom: 1px solid var(--line); }
+      .decision-table td { padding: 5px; border: 0; }
+      details.finding summary { grid-template-columns: auto minmax(0,1fr) auto; }
+      .finding-body { padding-left: 18px; }
+      .finding-body dl { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; font-size: 10.5pt; }
+      .side, .filters, .quick-action { display: none !important; }
+      .layout { display: block; }
+      main { max-width: none; padding: 22px; }
+      .hero { padding: 30px 24px; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      section { break-inside: auto; margin-bottom: 34px; }
+      .card, .decision-table, .evidence-table { box-shadow: none; }
+      details.finding { break-inside: avoid; }
+      details.finding > * { display: block !important; }
+      .grid { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Repository deep review · decision edition</div>
+      <h1>alpha_lab 深度仓库审查报告</h1>
+      <p class="lede">面向决策者的结论在前，面向工程师的证据、代码位置、复现与验收标准在后。审查重点是研究可信度、执行安全、工程可维护性，以及真正值得做的新能力。</p>
+      <div class="hero-meta">
+        <span>审查日期：2026-07-13</span>
+        <span>分支：main</span>
+        <span>快照：304b9053… + 当前未提交工作区</span>
+        <span>方式：静态审查 + 离线测试 + 定向复现</span>
+        <span>未连接交易所 · 未下任何真实订单</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="side" aria-label="报告目录">
+      <strong>快速决策</strong>
+      <a href="#executive">01 · 一页结论</a>
+      <a href="#decisions">02 · Go / No-Go</a>
+      <a href="#p0">03 · 必须先修</a>
+      <a href="#strengths">04 · 已有优势</a>
+      <strong style="margin-top:18px">深入分析</strong>
+      <a href="#research">05 · 研究可信度</a>
+      <a href="#execution">06 · 执行安全</a>
+      <a href="#engineering">07 · 工程健康</a>
+      <a href="#findings">08 · 全部发现</a>
+      <strong style="margin-top:18px">行动</strong>
+      <a href="#roadmap">09 · 90 天路线图</a>
+      <a href="#features">10 · 新功能建议</a>
+      <a href="#evidence">11 · 审查证据</a>
+      <a href="#appendix">12 · 范围与限制</a>
+      <div class="quick-action">
+        <button type="button" onclick="window.print()">打印 / 导出 PDF</button>
+      </div>
+    </nav>
+
+    <main>
+      <section id="executive">
+        <h2>一页结论</h2>
+        <p class="section-intro">这是一个研究纪律明显高于普通个人量化仓库的项目，但“研究做得认真”和“执行层已经可以托付真实资金”是两件事。当前最大风险不在策略想法，而在订单闭环和研究结果的经济口径。</p>
+
+        <div class="verdict">
+          <div class="verdict-line">结论：研究可继续，demo / paper 可有条件运行，真实资金执行应暂停。</div>
+          <p>研究与执行两条腿的边界清楚，207 项测试通过，核心向量回测默认滞后一根 bar，holdout 与决策记录也有真实约束；但执行器存在“目标归零却不会平仓”、下单回执被当成成交、实际持仓未参与风险上限计算等闭环缺口。与此同时，P7 v3.1 已没有未触碰的 OOS 窗口，融资成本仍未成为通用回测引擎的一等公民。</p>
+        </div>
+
+        <div class="grid grid-4" style="margin-top:18px">
+          <article class="card health">
+            <div class="label">研究架构</div>
+            <div class="grade good">强</div>
+            <small>两条腿单向依赖、公共逻辑已包化、核心回测有时序防线。</small>
+          </article>
+          <article class="card health">
+            <div class="label">研究可信度</div>
+            <div class="grade warn">有条件可信</div>
+            <small>holdout 纪律良好；但 P7 v3.1 无新鲜 OOS，成本口径需统一。</small>
+          </article>
+          <article class="card health">
+            <div class="label">执行安全</div>
+            <div class="grade stop">不具备实盘条件</div>
+            <small>平仓、成交确认、幂等与实际持仓风控尚未形成闭环。</small>
+          </article>
+          <article class="card health">
+            <div class="label">工程健康</div>
+            <div class="grade warn">基础稳，门禁漂移</div>
+            <small>测试完整度不错；核心 lint 仍有 26 项，打包与示例配置失配。</small>
+          </article>
+        </div>
+
+        <div class="grid grid-3" style="margin-top:18px">
+          <article class="card padded">
+            <span class="badge critical">P0 · 资金安全</span>
+            <h3 style="margin-top:10px">目标归零不会生成平仓单</h3>
+            <p>计划层和 broker 层都过滤零权重，已有仓位可能在策略转空仓后继续暴露。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge critical">P0 · 状态真实性</span>
+            <h3 style="margin-top:10px">“已提交”被记录为“已完成”</h3>
+            <p>没有订单 ID、成交量和仓位回查；半边成交仍会锁到次日。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge high">P1 · 研究口径</span>
+            <h3 style="margin-top:10px">收益口径未统一包含资金成本</h3>
+            <p>策略各自手工补融资成本，容易再次出现 P6 类型的收益高估。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="decisions">
+        <h2>Go / No-Go 决策表</h2>
+        <p class="section-intro">如果今天必须做资源或上线决策，建议按下表执行。这里的“继续”不等于可以扩大资金风险。</p>
+        <table class="decision-table">
+          <thead>
+            <tr><th>事项</th><th>建议</th><th>决策理由</th><th>解除条件</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>继续探索性研究</td>
+              <td><span class="status go">GO</span></td>
+              <td>数据加载、分析、回测、holdout、决策记录已形成可复用骨架。</td>
+              <td>新研究仍需遵守时序、成本和 holdout 规则。</td>
+            </tr>
+            <tr>
+              <td>P7 demo / paper 监控</td>
+              <td><span class="status conditional">CONDITIONAL</span></td>
+              <td>可继续收集真实前向证据，但当前绩效不能再称为 untouched OOS。</td>
+              <td>重标 2025/2026 数据身份，冻结新的前向窗口；先修执行 P0。</td>
+            </tr>
+            <tr>
+              <td>P7 或其他策略真实资金</td>
+              <td><span class="status stop">NO-GO</span></td>
+              <td>存在不平仓、部分成交不对账、风险基于目标而非实际持仓等问题。</td>
+              <td>完成 reconciliation-first 执行闭环，并通过故障注入验收。</td>
+            </tr>
+            <tr>
+              <td>把 P7 v3.1 当作新鲜 OOS 证据</td>
+              <td><span class="status stop">NO-GO</span></td>
+              <td>2025 已用于 v3.1 选择，2026 结果已被观察；透明但已污染。</td>
+              <td>只把之后冻结的前向期作为新证据。</td>
+            </tr>
+            <tr>
+              <td>QQQ put-write 进入产品化</td>
+              <td><span class="status conditional">PAPER ONLY</span></td>
+              <td>当前是 VXN / Black-Scholes 代理研究，不是期权链成交回测；项目记录本身也限制为 paper advisory。</td>
+              <td>积累 3–6 个月期权链与可交易报价，再评估真实执行。</td>
+            </tr>
+            <tr>
+              <td>新增 broker / 扩大执行功能</td>
+              <td><span class="status stop">DEFER</span></td>
+              <td>新接入会放大现有执行状态机缺口。</td>
+              <td>先完成 P0 闭环、严格配置和运行前自检。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="p0">
+        <h2>必须先修的三件事</h2>
+        <p class="section-intro">这三项应作为 stop-the-line 工作，不需要等待策略迭代，也不应被新功能挤占。</p>
+
+        <div class="grid">
+          <article class="card priority">
+            <div class="priority-head">
+              <div>
+                <span class="badge critical">CRITICAL · EX-01</span>
+                <h3 style="margin-top:8px">显式零目标被丢弃，策略无法可靠平仓</h3>
+              </div>
+              <span class="status stop">实盘阻断</span>
+            </div>
+            <div class="priority-body">
+              <p><strong>业务影响：</strong>策略从持仓切换到空仓时，执行计划为空，broker 直接返回；历史仓位可能继续承受市场波动，而系统界面看起来像“没有需要交易”。</p>
+              <div class="evidence">
+                <span class="source-kind">事实</span>
+                <a href="../src/quant_bot_manager/core/runner.py">runner.py:52–60</a> 只保留非零 legs；
+                <a href="../src/quant_bot_manager/brokers/binance.py">binance.py:81–99</a> 再次跳过零权重，并对空计划提前返回。离线复现：<code>rows=0, empty=True, rebalance_on_empty_returns=[]</code>。
+              </div>
+              <p><strong>可行修复：</strong>计划必须从“策略完整交易域 ∪ 当前实际仓位”构建；零目标要保留，订单量按 <code>target - current</code> 计算。任何当前非零、目标为零的 leg 都必须生成 close delta。</p>
+              <div class="acceptance"><strong>验收：</strong>模拟账户先持有 BTC/ETH，再输入全零目标；必须生成平仓单，成交后实际仓位在 dust tolerance 内为零。覆盖 spot、perp、混合、最小下单量和部分成交。</div>
+            </div>
+          </article>
+
+          <article class="card priority">
+            <div class="priority-head">
+              <div>
+                <span class="badge critical">CRITICAL · EX-02</span>
+                <h3 style="margin-top:8px">下单提交被当作成交完成，部分成交可锁到次日</h3>
+              </div>
+              <span class="status stop">状态不可信</span>
+            </div>
+            <div class="priority-body">
+              <p><strong>业务影响：</strong>一条腿失败、另一条腿提交后，runner 仍可能写入当天已 rebalance，并返回 <code>ok</code>。系统没有订单 ID、filled quantity、平均成交价和最终仓位的权威记录。</p>
+              <div class="evidence">
+                <span class="source-kind">事实</span>
+                <a href="../src/quant_bot_manager/brokers/binance.py">binance.py:101–112</a> 仅调用 <code>create_order</code> 后追加 tuple；
+                <a href="../src/quant_bot_manager/core/runner.py">runner.py:105–108</a> 只要有 placed 项就写 rebalance 日期；<a href="../src/quant_bot_manager/core/runner.py">runner.py:151–155</a> 注释已承认 partial-fill latch。
+              </div>
+              <p><strong>可行修复：</strong>先落订单 intent 和幂等 clientOrderId，再提交；逐单保存交易所 order ID、状态、成交量、均价、错误；全部提交后重新拉取实际持仓，按容差决定 <code>COMPLETE / PARTIAL / FAILED</code>。只允许 COMPLETE 推进日锁。</p>
+              <div class="acceptance"><strong>验收：</strong>用 fake broker 注入第二腿超时、第一腿半成交、重复回调、进程中断；重启后不得重复超额下单，并能继续完成或安全回滚到目标容差。</div>
+            </div>
+          </article>
+
+          <article class="card priority">
+            <div class="priority-head">
+              <div>
+                <span class="badge critical">CRITICAL · EX-03</span>
+                <h3 style="margin-top:8px">实盘双重确认只在 CLI 完整，直接调用 broker 可绕过一层</h3>
+              </div>
+              <span class="status stop">安全边界</span>
+            </div>
+            <div class="priority-body">
+              <p><strong>业务影响：</strong>CLI 同时要求环境变量和显式参数，但 Python 调用者可直接构造 live broker；broker 自己只验证 <code>CONFIRM_LIVE=YES</code>。这不满足仓库声明的“双钥匙”原则。</p>
+              <div class="evidence">
+                <span class="source-kind">事实</span>
+                <a href="../src/quant_bot_manager/cli.py">cli.py:31–36</a> 有双门；
+                <a href="../src/quant_bot_manager/brokers/binance.py">binance.py:44–46</a> 只检查环境变量。UI 当前固定从 demo 启动，这是优点，但不能替代底层门禁。
+              </div>
+              <p><strong>可行修复：</strong>live broker 构造时必须接收无默认值的 <code>LiveAuthorization</code> 能力对象；该对象仅能由通过 CLI 显式 flag + 环境变量校验的入口创建。所有测试和 UI 默认继续使用 demo。</p>
+              <div class="acceptance"><strong>验收：</strong>直接 Python 调用、缺 flag、缺环境变量、demo key 误用于 live、live key 误用于 demo 均 fail closed；只有两项确认同时存在时才允许连接，且测试不触网。</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="strengths">
+        <h2>值得保留并继续强化的部分</h2>
+        <p class="section-intro">本次审查不是“推倒重来”。下面这些基础已经有实际价值，后续改造应围绕它们增量演进。</p>
+        <div class="grid grid-3">
+          <article class="card strength">
+            <h3>研究 / 执行边界清楚</h3>
+            <p><code>alpha_lab</code> 不反向依赖 <code>quant_bot_manager</code>；执行层可以复用研究层目标权重，方向正确。</p>
+          </article>
+          <article class="card strength">
+            <h3>通用回测默认滞后一根 bar</h3>
+            <p><a href="../src/alpha_lab/backtest/vector.py">vector.py:117–160</a> 对目标权重做 lag，降低同收盘信号吃同收盘收益的常见错误。</p>
+          </article>
+          <article class="card strength">
+            <h3>holdout 有机械约束</h3>
+            <p>数据层不仅有文档约定，还有 release 状态、审计记录与相应测试，优于仅靠研究者自觉。</p>
+          </article>
+          <article class="card strength">
+            <h3>执行状态有 WAL 和单飞锁</h3>
+            <p>SQLite WAL、跨进程 rebalance lock、drawdown 自动 halt 已经搭出正确骨架，适合继续补强而不是换架构。</p>
+          </article>
+          <article class="card strength">
+            <h3>决策记录能承认失败</h3>
+            <p>P6 主动修正 cost-of-cash，P7 记录 2026 弱化，QQQ 研究限制 paper only；这类诚实比更多策略更有价值。</p>
+          </article>
+          <article class="card strength">
+            <h3>基本质量底座可用</h3>
+            <p>完整测试套件 207 项通过；高置信 secret 扫描无命中，本地文档链接全部有效，raw/private 目录也有忽略规则。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="research">
+        <h2>研究可信度：哪里可相信，哪里只能观察</h2>
+        <p class="section-intro">可信度不是一个总分。需要分别看时序、样本外、成本、样本宇宙和结果复现。当前最强的是信号时序骨架，最弱的是“修正后策略还有没有未触碰验证集”。</p>
+
+        <div class="pipeline" aria-label="研究可信度链条">
+          <div>数据可用时间</div>
+          <div>信号与执行时序</div>
+          <div>成本与资金占用</div>
+          <div class="broken">未触碰 OOS</div>
+          <div>决策 / 上线</div>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="card padded">
+            <span class="badge high">R-01 · OOS</span>
+            <h3 style="margin-top:10px">P7 v3.1 没有新的 untouched OOS</h3>
+            <p>2026 holdout 暴露问题后，v3.1 的修复在截至 2025 的样本上做选择；这意味着原 2025 OOS 已变成开发样本，而 2026 结果也已经被看过。流程很透明，但证据身份必须重标。</p>
+            <div class="evidence">
+              <a href="../docs/research_decisions/crypto_intraday/P7-multi-strategy-book.md">P7 决策记录</a> 与
+              <a href="../notebooks/90_crypto_intraday/fix_s5.py">fix_s5.py:43–44, 157–175</a>。
+            </div>
+            <p><strong>建议：</strong>2025 标为 development，2026 标为 released-holdout / post-event validation；冻结下一段前向期，只允许监控，不再回头调参。</p>
+          </article>
+
+          <article class="card padded">
+            <span class="badge high">R-02 · Economics</span>
+            <h3 style="margin-top:10px">融资成本不是回测引擎的一等公民</h3>
+            <p>合同说 net return 应包含 cost of cash，但通用 vector engine 只统一扣交易、滑点和 funding；crypto / congress 再各自手工 overlay。这让遗漏变得容易，P6 已证明影响可能很大。</p>
+            <div class="evidence">
+              <a href="../docs/contracts/research_artifacts.md">research_artifacts.md:205–210</a>；
+              <a href="../src/alpha_lab/backtest/vector.py">vector.py:79–177</a>；
+              <a href="../src/alpha_lab/backtest/crypto_book.py">crypto_book.py:188–190</a>。
+            </div>
+            <p><strong>建议：</strong>让 <code>BacktestResult</code> 明确输出 trading / funding / financing / idle-cash 分项，并按部署资本或保证金口径收费。</p>
+          </article>
+
+          <article class="card padded">
+            <span class="badge high">R-03 · API footgun</span>
+            <h3 style="margin-top:10px">全样本 z-score / winsorize 默认可被误用</h3>
+            <p><a href="../src/alpha_lab/features/transforms.py">transforms.py:18–33</a> 默认可沿时间轴使用全样本均值、标准差和分位数。当前未发现 accepted P7 直接调用，因此不是现有结果的已确认泄漏，但作为可复用 API 的默认行为不安全。</p>
+            <p><strong>建议：</strong>把横截面、rolling、expanding 和 diagnostic-only 版本拆成清晰命名；新增“截断数据后历史结果不变”的 truncation-invariance 测试。</p>
+          </article>
+
+          <article class="card padded">
+            <span class="badge medium">R-04 · Survivorship</span>
+            <h3 style="margin-top:10px">Universe CSV 与自身合同不一致</h3>
+            <p><code>country_etf_universe.csv</code> 和 <code>us_sector_etf.csv</code> 缺少合同要求的生效日期 / 版本字段；当前成分被投射到历史研究会产生 survivorship 风险。</p>
+            <div class="evidence">
+              <a href="../docs/contracts/research_artifacts.md">Universe 合同</a>；
+              <a href="../configs/country_etf_universe.csv">country_etf_universe.csv</a>；
+              <a href="../configs/us_sector_etf.csv">us_sector_etf.csv</a>。
+            </div>
+            <p><strong>建议：</strong>新增 schema + point-in-time validator，至少强制 <code>start_date</code>、版本、重复项与覆盖期检查。</p>
+          </article>
+        </div>
+
+        <div class="note warning-note" style="margin-top:18px">
+          <strong>泄漏审计结论：</strong>自动扫描器在 crypto 与 src/scripts 中报告的最高级命中，大部分是“前向收益作为研究标签”和“诊断性 bootstrap 分位数”，经人工追踪不是交易信号泄漏。当前 accepted P7 未确认存在 same-bar 或 future-feature 泄漏；但 P7 v3.1 的 OOS 已被污染、融资成本口径不完整，所以仍不能把 headline performance 当作 execution-grade 证据。旧 DBMF sizing notebook 已在项目 backlog 自报 full-sample volatility normalization，修复重跑前不应作为可交易绩效。
+        </div>
+      </section>
+
+      <section id="execution">
+        <h2>执行安全：骨架存在，但状态闭环尚未完成</h2>
+        <p class="section-intro">当前执行腿更像“可靠的 demo 控制框架原型”，还不是交易账本。关键缺口不是界面，而是 intent → order → fill → position → risk → audit 的闭环。</p>
+
+        <div class="pipeline" aria-label="执行状态链条">
+          <div>目标权重</div>
+          <div class="broken">差额计划</div>
+          <div class="broken">订单 / 成交</div>
+          <div class="broken">实际持仓</div>
+          <div>风控与审计</div>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="card padded">
+            <span class="badge high">EX-04 · Risk basis</span>
+            <h3 style="margin-top:10px">gross cap 检查目标计划，不检查实际 / 预计持仓</h3>
+            <p><a href="../src/quant_bot_manager/core/runner.py">runner.py:60, 102–104</a> 的风险检查基于 plan。若旧仓位因零目标被丢弃，目标 gross 看似合规，真实 gross 仍可能超限。</p>
+            <p><strong>修复：</strong>按当前仓位 + 拟执行 delta 计算 projected position，并在成交后再次断言实际 gross / net / per-leg 风险。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge high">EX-05 · Credentials</span>
+            <h3 style="margin-top:10px">允许不完整 venue 凭据，后续却同时使用 spot 和 futures</h3>
+            <p><a href="../src/quant_bot_manager/brokers/binance.py">binance.py:48–65</a> 接受任一组凭据；<a href="../src/quant_bot_manager/brokers/binance.py">binance.py:129–136</a> 的 mark-to-market 又无条件访问两端。当前 P7 需要二者。</p>
+            <p><strong>修复：</strong>每个 bot 声明 required venues / legs，连接前完成整组 key+secret 和权限预检，任何缺口在下单前 fail closed。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge high">EX-06 · Locking</span>
+            <h3 style="margin-top:10px">过期锁被新 owner 接管后，旧 owner 仍能删除它</h3>
+            <p><a href="../src/quant_bot_manager/core/store.py">store.py:148–171</a> 支持 600 秒后 steal，但 release 不比较 owner。旧进程晚到的 release 可清除新进程的锁。</p>
+            <p><strong>修复：</strong>token compare-and-delete；长流程 heartbeat；新增“stale steal 后旧 owner release”并发测试。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge high">EX-07 · Process</span>
+            <h3 style="margin-top:10px">stop 根据旧 PID 强杀，可能杀错进程或截断审计</h3>
+            <p><a href="../src/quant_bot_manager/core/state.py">state.py:91–103</a> 未校验进程启动 token / command line 就 <code>taskkill</code>。PID 重用和下单后审计前被杀都可能造成异常。</p>
+            <p><strong>修复：</strong>持久化 PID + start token + command identity，先发优雅停止信号并等待，再按身份校验后强杀。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="engineering">
+        <h2>工程健康：测试过关，但“完成标准”没有真正成为门禁</h2>
+        <p class="section-intro">核心代码并非失控；主要问题是规则写得对，却没有机械执行。短期不需要引入重型平台，只需把现有约定变成 fail-fast 检查。</p>
+
+        <div class="grid grid-2">
+          <article class="card padded">
+            <span class="badge high">E-01 · Config</span>
+            <h3 style="margin-top:10px">配置解析 fail-open</h3>
+            <p><a href="../src/quant_bot_manager/core/schema.py">schema.py:29–58</a> 会静默丢弃未知键，并用 Python <code>bool()</code> 转换字符串。离线复现：<code>{"max_gros": 0.1, "paused": "false"}</code> 得到默认 <code>max_gross=2.0</code> 且 <code>paused=True</code>。</p>
+            <p><strong>修复：</strong>拒绝未知键、严格解析 bool、拒绝 NaN/inf，错误消息包含配置来源与字段名。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge high">E-02 · Packaging</span>
+            <h3 style="margin-top:10px">可编辑安装不等于可分发安装</h3>
+            <p><a href="../pyproject.toml">pyproject.toml:53–54</a> 的 wheel packages 仅包含 <code>src/alpha_lab</code>，遗漏 <code>quant_bot_manager</code>；依赖也未声明执行腿使用的 <code>ccxt</code>、<code>streamlit</code>。<a href="../.env.example">.env.example</a> 还缺 demo key 名并指向不存在脚本。</p>
+            <p><strong>修复：</strong>wheel 纳入两包；增加 <code>execution</code> optional extra；构建 wheel 后在干净环境做 import/CLI smoke test；同步示例配置。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge medium">E-03 · Quality gate</span>
+            <h3 style="margin-top:10px">207 项测试通过，但 Ruff 门禁失败</h3>
+            <p><code>ruff check .</code> 报 162 项；缩到 <code>src tests</code> 仍有 26 项，其中 14 项可自动修复。规则要求任务完成前通过 Ruff，目前实际流程与规则脱节。</p>
+            <p><strong>修复：</strong>先清核心 26 项；包和测试作为 blocking lint，notebook/report scripts 使用独立、明确的 lint 范围，不用一次大扫除掩盖功能改动。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge medium">E-04 · Notebook hygiene</span>
+            <h3 style="margin-top:10px">两本 notebook 带输出进入仓库</h3>
+            <p><code>01_fed_rate_decisions.ipynb</code> 有 5 个输出 / 6 个 execution count，<code>02_iran_war.ipynb</code> 有 3 个输出 / 4 个 execution count，违反提交前清输出规则。</p>
+            <p><strong>修复：</strong>用 pre-commit 或现有脚本做只读检查；发现输出直接失败，清理动作仍由提交者明确执行。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge medium">E-05 · Complexity</span>
+            <h3 style="margin-top:10px">当前 QQQ 工作区有几个过长函数</h3>
+            <p>未提交的 <code>run_cash_secured_put_backtest</code> 约 351 行；<code>qqq_putwrite_study.py</code> 约 1,462 行，其中报告、图表、主流程函数各自 200–300 行。测试已通过，但会增加审阅成本。</p>
+            <p><strong>修复：</strong>提交前只拆三类稳定边界：simulation state transition、policy specification、report serialization；不引入抽象基类或插件系统。</p>
+          </article>
+          <article class="card padded">
+            <span class="badge low">E-06 · Agent governance</span>
+            <h3 style="margin-top:10px">技能目录存在双份且已有漂移</h3>
+            <p><code>.claude/skills</code> 被跟踪，<code>.agents/skills</code> 未跟踪且内容已有约 155 行新增 / 144 行删除的差异。团队可能在不同入口执行不同规则。</p>
+            <p><strong>修复：</strong>选一个 canonical source，另一目录自动生成或做同步检查；不要人工双写。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="findings">
+        <h2>全部发现与工程细节</h2>
+        <p class="section-intro">默认展开 P0，其他项可按严重度或领域过滤。每项都区分已验证事实、影响、建议与验收，避免把推断写成事实。</p>
+        <div class="filters" aria-label="发现过滤器">
+          <button type="button" class="filter active" data-filter="all">全部</button>
+          <button type="button" class="filter" data-filter="critical">Critical</button>
+          <button type="button" class="filter" data-filter="high">High</button>
+          <button type="button" class="filter" data-filter="medium">Medium</button>
+          <button type="button" class="filter" data-filter="research">研究</button>
+          <button type="button" class="filter" data-filter="execution">执行</button>
+          <button type="button" class="filter" data-filter="engineering">工程</button>
+          <button type="button" id="expand-all">展开全部</button>
+          <button type="button" id="collapse-all">收起全部</button>
+        </div>
+
+        <div class="findings">
+          <details class="finding" data-level="critical" data-domain="execution" open>
+            <summary><span class="badge critical">Critical</span><span class="finding-title">EX-01 · 零目标被过滤，现有仓位无法可靠归零</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>runner 和 broker 双重过滤零权重；空 plan 直接返回。离线 fake broker 复现结果为空订单列表。</dd>
+              <dt>影响</dt><dd>持仓泄漏到策略目标之外，实际风险不可见。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/core/runner.py">runner.py:52–60</a>；<a href="../src/quant_bot_manager/brokers/binance.py">binance.py:81–99</a></dd>
+              <dt>修复</dt><dd>从 current ∪ target 完整域计算 delta，保留显式零目标。</dd>
+              <dt>验收</dt><dd>从非零仓位切换到全零时生成 close order，最终仓位在 tolerance 内归零。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="critical" data-domain="execution" open>
+            <summary><span class="badge critical">Critical</span><span class="finding-title">EX-02 · 订单提交被视为成交，缺少 reconciliation</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>无 order ID / filled qty / avg price；只要 placed 非空即推进 last_rebal_date。</dd>
+              <dt>影响</dt><dd>半边成交、超时和进程中断会形成未管理风险，状态仍显示成功。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/brokers/binance.py">binance.py:101–112</a>；<a href="../src/quant_bot_manager/core/runner.py">runner.py:105–108, 151–155</a></dd>
+              <dt>修复</dt><dd>intent ledger、clientOrderId、订单状态轮询、持仓回查、PARTIAL 状态和安全重试。</dd>
+              <dt>验收</dt><dd>部分成交和中断故障注入后，重启不重复超额下单且能恢复到目标。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="critical" data-domain="execution" open>
+            <summary><span class="badge critical">Critical</span><span class="finding-title">EX-03 · 底层 live broker 缺一层显式授权</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>CLI 有 flag + env 双门，broker.connect 只检查 env。</dd>
+              <dt>影响</dt><dd>非 CLI Python 调用可绕过用户显式确认层。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/cli.py">cli.py:31–36</a>；<a href="../src/quant_bot_manager/brokers/binance.py">binance.py:44–46</a></dd>
+              <dt>修复</dt><dd>live capability 无默认值，由通过双重校验的入口显式注入。</dd>
+              <dt>验收</dt><dd>所有缺 flag / env / key-origin 的路径 fail closed。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="execution">
+            <summary><span class="badge high">High</span><span class="finding-title">EX-04 · 风险上限基于目标，而不是 projected / actual positions</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>gross 从 plan 聚合；未把未平旧仓、部分成交纳入。</dd>
+              <dt>影响</dt><dd>系统判断合规时真实 gross 仍可超限。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/core/runner.py">runner.py:60, 102–104</a></dd>
+              <dt>修复</dt><dd>pre-trade projected risk + post-trade actual risk，两次检查 gross/net/per-leg。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="execution">
+            <summary><span class="badge high">High</span><span class="finding-title">EX-05 · venue 凭据校验与实际使用范围不一致</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>允许只有 spot 或 futures 凭据，mark-to-market 却访问两者。</dd>
+              <dt>影响</dt><dd>运行中途才失败，可能发生在一部分动作已经完成之后。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/brokers/binance.py">binance.py:48–65, 129–136</a></dd>
+              <dt>修复</dt><dd>bot 声明 required venues；连接阶段一次性验证完整凭据、权限和市场可用性。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="execution">
+            <summary><span class="badge high">High</span><span class="finding-title">EX-06 · stale lock 的旧 owner 可以删除新 owner 的锁</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>claim 记录 owner/time 并允许超时接管；release 无 owner 条件。</dd>
+              <dt>影响</dt><dd>极端情况下两个 rebalance 可并发进入。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/core/store.py">store.py:148–171</a></dd>
+              <dt>修复</dt><dd>随机 token + 条件删除事务；heartbeat；覆盖旧 owner 延迟 release 测试。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="execution">
+            <summary><span class="badge high">High</span><span class="finding-title">EX-07 · PID stop 可能杀错进程并截断交易审计</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>从持久化状态取 PID 后直接 taskkill，未校验进程身份。</dd>
+              <dt>影响</dt><dd>PID 重用会误杀；强制中断可能落在提交订单与写审计之间。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/core/state.py">state.py:91–103</a></dd>
+              <dt>修复</dt><dd>启动 token + command identity；graceful stop first，force kill 仅作超时 fallback。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="engineering">
+            <summary><span class="badge high">High</span><span class="finding-title">E-01 · 配置 typo 被静默忽略，字符串 bool 被错误解释</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd><code>max_gros</code> 被丢弃并回到默认 2.0；字符串 <code>"false"</code> 被转换为 True。</dd>
+              <dt>影响</dt><dd>风险参数看似配置成功，实际使用更宽默认值。</dd>
+              <dt>位置</dt><dd><a href="../src/quant_bot_manager/core/schema.py">schema.py:29–58</a></dd>
+              <dt>修复</dt><dd>unknown=forbid；严格 bool；finite 数值；错误包含 source。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="engineering">
+            <summary><span class="badge high">High</span><span class="finding-title">E-02 · wheel 漏掉执行包，执行依赖和 demo 配置也未对齐</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>wheel packages 只列 alpha_lab；ccxt / streamlit 未声明；.env.example 缺 DEMO key 且引用不存在脚本。</dd>
+              <dt>影响</dt><dd>新环境按 README 安装后无法可靠启动执行腿。</dd>
+              <dt>位置</dt><dd><a href="../pyproject.toml">pyproject.toml:15–31, 53–54</a>；<a href="../.env.example">.env.example:11–22</a></dd>
+              <dt>修复</dt><dd>两包入 wheel，execution extra，构建后干净环境 smoke test。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="research">
+            <summary><span class="badge high">High</span><span class="finding-title">R-01 · P7 v3.1 的 2025/2026 样本身份需要重标</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>修复脚本读取至 2026，并用截至 2025 的数据选择修复；2026 结果已经观察。</dd>
+              <dt>影响</dt><dd>将 2025 称 OOS、2026 称 true OOS 会高估验证强度。</dd>
+              <dt>位置</dt><dd><a href="../notebooks/90_crypto_intraday/fix_s5.py">fix_s5.py:43–44, 157–175</a>；<a href="../notebooks/90_crypto_intraday/render_multi_strategy_report.py">render_multi_strategy_report.py:142</a></dd>
+              <dt>修复</dt><dd>重标 development / released holdout，冻结新的 forward-only 窗口。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="research">
+            <summary><span class="badge high">High</span><span class="finding-title">R-02 · 回测收益合同要求融资成本，通用引擎未实现</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>vector engine 统一扣 commission/slippage/funding，但没有 financing/cash leg。</dd>
+              <dt>影响</dt><dd>每个策略手工补口径，容易遗漏或重复；不同报告不可直接比较。</dd>
+              <dt>位置</dt><dd><a href="../docs/contracts/research_artifacts.md">research_artifacts.md:205–210</a>；<a href="../src/alpha_lab/backtest/vector.py">vector.py:79–177</a></dd>
+              <dt>修复</dt><dd>first-class cost ledger，并在 BacktestResult 中保留所有分项。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="research">
+            <summary><span class="badge high">High</span><span class="finding-title">R-03 · 现有融资公式只按 long notional，未覆盖所有资本占用</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>crypto 与 congress 的 excess-return overlay 使用正权重 gross long notional。</dd>
+              <dt>影响</dt><dd>纯空期货、市场中性和保证金策略可能仍占用资本，但得到零现金成本；具体偏差取决于 venue collateral 规则。</dd>
+              <dt>位置</dt><dd><a href="../src/alpha_lab/backtest/crypto_book.py">crypto_book.py:188–190</a>；<a href="../src/alpha_lab/backtest/congress_book.py">congress_book.py:162–165</a></dd>
+              <dt>修复</dt><dd>显式建模 deployed capital / borrowed cash / collateral / idle cash，按策略类型选择基础。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="research">
+            <summary><span class="badge high">High</span><span class="finding-title">R-04 · transforms 的全样本默认行为是未来泄漏脚枪</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>zscore 可默认沿时间全样本标准化；winsorize 使用全样本 quantile。未发现 accepted P7 当前调用。</dd>
+              <dt>影响</dt><dd>未来研究者很容易无意中让早期特征看到未来统计量。</dd>
+              <dt>位置</dt><dd><a href="../src/alpha_lab/features/transforms.py">transforms.py:18–33</a></dd>
+              <dt>修复</dt><dd>安全默认 rolling/expanding，diagnostic-only API 显式命名并警告。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="high" data-domain="research">
+            <summary><span class="badge high">High</span><span class="finding-title">R-05 · DBMF sizing notebook 已知使用 full-sample volatility</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>项目自己的 notebook-to-package backlog 明确记录该风险；自动扫描未抓到，人工 checklist 抓到。</dd>
+              <dt>影响</dt><dd>该 notebook 的历史可交易绩效不可直接相信。</dd>
+              <dt>位置</dt><dd><a href="../docs/backlog/notebook_to_package_backlog.md">notebook_to_package_backlog.md · Research risks #1</a></dd>
+              <dt>修复</dt><dd>改用 lagged rolling / expanding volatility，重新运行并更新决策记录。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="research">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">R-06 · Universe 文件缺少 point-in-time 字段</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>country / sector CSV 没有合同规定的 start_date / 版本信息。</dd>
+              <dt>影响</dt><dd>历史研究可能带入当前可见成分和 ETF 存续偏差。</dd>
+              <dt>位置</dt><dd><a href="../configs/country_etf_universe.csv">country_etf_universe.csv</a>；<a href="../configs/us_sector_etf.csv">us_sector_etf.csv</a></dd>
+              <dt>修复</dt><dd>日期版本化 universe + schema validator + 研究运行时落版本指纹。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="research">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">R-07 · vector backtest 对 signal columns 和成本映射 fail-open</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>signals 被 reindex 到 price columns，额外/拼错列静默丢弃；slippage dict 缺 symbol 默认 0，且已有测试固定该行为。</dd>
+              <dt>影响</dt><dd>配置错误可能变成零交易或零成本，而不是立刻失败。</dd>
+              <dt>位置</dt><dd><a href="../src/alpha_lab/backtest/vector.py">vector.py:117, 142–146</a>；<a href="../tests/test_vector_funding.py">test_vector_funding.py:170–186</a></dd>
+              <dt>修复</dt><dd>默认 exact schema；显式允许 subset；成本映射必须完整；检查索引有序、唯一、价格有限与 forward-fill 上限。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="engineering">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">E-03 · Ruff 门禁与实际“done”状态不一致</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>全仓 162 项；src/tests 26 项，14 项可自动修复。pytest 仍全部通过。</dd>
+              <dt>影响</dt><dd>规范无法作为可靠门禁，真正新引入的问题容易淹没在历史噪音里。</dd>
+              <dt>修复</dt><dd>先清核心范围并冻结增量；notebook 与一次性报告脚本独立配置。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="engineering">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">E-04 · 两本事件研究 notebook 未清输出</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>Fed notebook 5 outputs / 6 counts；Iran notebook 3 outputs / 4 counts。</dd>
+              <dt>影响</dt><dd>增加仓库体积、diff 噪音与潜在数据泄漏风险，且违反明确规则。</dd>
+              <dt>位置</dt><dd><a href="../notebooks/80_event_study/01_fed_rate_decisions.ipynb">01_fed_rate_decisions.ipynb</a>；<a href="../notebooks/80_event_study/02_iran_war.ipynb">02_iran_war.ipynb</a></dd>
+              <dt>修复</dt><dd>提交前自动检查 execution_count / outputs 均为空。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="engineering">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">E-05 · QQQ put-write 当前实现过度集中在长函数</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>核心 backtest 函数约 351 行；study script 约 1,462 行，报告/图表/main 各 200–300 行。</dd>
+              <dt>影响</dt><dd>状态转换难审、策略假设与报告呈现耦合，未来期权链替换成本高。</dd>
+              <dt>位置</dt><dd><a href="../src/alpha_lab/backtest/put_write.py">put_write.py</a>；<a href="../scripts/qqq_putwrite_study.py">qqq_putwrite_study.py</a></dd>
+              <dt>修复</dt><dd>只沿 simulation / policy / presentation 三个真实边界拆分，保持函数纯、类型化；不引入框架。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="medium" data-domain="engineering">
+            <summary><span class="badge medium">Medium</span><span class="finding-title">E-06 · 文档与当前能力有漂移</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>README 仍称部分已实现模块是 placeholder；ROADMAP 与现有 execution leg 的状态表述不完全一致；.env.example 已过期；P7 报告仍称 true OOS。</dd>
+              <dt>影响</dt><dd>新贡献者和决策者会从错误入口形成错误预期。</dd>
+              <dt>修复</dt><dd>把 README 定位为当前能力索引，研究结论从 manifest / decision registry 生成摘要，减少手工复制。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="low" data-domain="engineering">
+            <summary><span class="badge low">Low</span><span class="finding-title">E-07 · .claude / .agents 技能双份漂移</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd>.claude 被 git 跟踪；.agents 当前未跟踪，技能内容存在 155 insertions / 144 deletions 的差异。</dd>
+              <dt>影响</dt><dd>不同代理入口可能执行不同审计标准。</dd>
+              <dt>修复</dt><dd>一个 canonical source，另一入口生成或链接；增加同步校验。</dd>
+            </dl></div>
+          </details>
+
+          <details class="finding" data-level="low" data-domain="engineering">
+            <summary><span class="badge low">Low</span><span class="finding-title">E-08 · 本地 nested worktrees 有可清理项</span></summary>
+            <div class="finding-body"><dl>
+              <dt>已验证</dt><dd><code>.claude/worktrees</code> 约 113.6 MB / 1,480 files；git worktree 列表有两个 prunable 的旧 C: 路径。</dd>
+              <dt>影响</dt><dd>只影响本地整洁与工具扫描速度，不是产品缺陷。</dd>
+              <dt>修复</dt><dd>确认无需要保留的工作后由维护者执行 <code>git worktree prune</code>；本次审查未自动删除。</dd>
+            </dl></div>
+          </details>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <h2>建议的 90 天路线图</h2>
+        <p class="section-intro">顺序遵循“先让状态真实，再让研究口径可比，最后提升产能”。不建议此时增加策略数量或 broker 数量。</p>
+        <div class="roadmap">
+          <article class="card phase">
+            <span class="badge critical">0–7 天 · Stop the line</span>
+            <h3 style="margin-top:10px">封住可能留下真实仓位的路径</h3>
+            <ul>
+              <li>保持 live mode 禁用；不弱化现有任何门禁。</li>
+              <li>修复 explicit-zero / current-position delta 计划，并补 spot/perp/dust 测试。</li>
+              <li>建立 per-leg order result 与成交后 position reconciliation；只有 COMPLETE 推进日锁。</li>
+              <li>风险上限改为 projected + actual 双检查。</li>
+              <li>live capability 下沉 broker；required venue 凭据预检。</li>
+            </ul>
+          </article>
+          <article class="card phase">
+            <span class="badge high">第 2–4 周 · 让规则可机械执行</span>
+            <h3 style="margin-top:10px">统一经济口径和 fail-fast 契约</h3>
+            <ul>
+              <li>BacktestResult 增加 trading / funding / financing / idle cash 分项。</li>
+              <li>重标 P7 样本身份并冻结新的 forward-only 观察期。</li>
+              <li>严格配置解析；完成 wheel / execution extra / demo env 修复。</li>
+              <li>替换不安全 transforms 默认，增加 truncation-invariance 测试。</li>
+              <li>清理 src/tests 26 项 Ruff，并加入 notebook-output 检查。</li>
+            </ul>
+          </article>
+          <article class="card phase">
+            <span class="badge medium">第 2–3 月 · 提升复现与运营能力</span>
+            <h3 style="margin-top:10px">把可信度证据自动沉淀</h3>
+            <ul>
+              <li>研究运行 manifest + 决策登记表，记录数据、代码、样本和成本身份。</li>
+              <li>Universe / data quality validator，优先覆盖 country/sector ETF。</li>
+              <li><code>qbm doctor</code> 无下单运行前自检。</li>
+              <li>shadow execution drift monitor 与 graceful process lifecycle。</li>
+              <li>在提交当前 QQQ 工作前拆分长状态机和报告代码。</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="features">
+        <h2>实际可行的新功能建议</h2>
+        <p class="section-intro">这些不是“加 AI”“做平台”式泛泛建议，而是直接复用现有 SQLite、BacktestResult、decision records 和配置结构的小步能力。工期按熟悉仓库的 1 名工程师估算，不包含外部交易所联调等待。</p>
+
+        <div class="grid grid-2">
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge critical">优先级 P0</span><span class="status info">3–5 人日</span></div>
+            <h3>1. Reconciliation-first Executor</h3>
+            <p class="why">把当前“发订单的 runner”升级为“以实际持仓收敛为目标的状态机”，一次解决零目标、部分成交、幂等和重启恢复。</p>
+            <ul>
+              <li>持久化 intent、clientOrderId、exchange order ID、fills、position snapshots。</li>
+              <li>状态：PLANNED → SUBMITTED → PARTIAL → COMPLETE / FAILED。</li>
+              <li>仅在实际仓位进入容差后标记完成。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>5 类故障注入全部安全恢复；重复运行不增加超额敞口。</p>
+          </article>
+
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge high">优先级 P1</span><span class="status info">1–2 人日</span></div>
+            <h3>2. <code>qbm doctor</code> 运行前自检</h3>
+            <p class="why">在任何 runner 启动前，无下单地检查配置、依赖、凭据来源、venue 完整性、市场精度、时钟与数据新鲜度。</p>
+            <ul>
+              <li>默认只检查 demo；live 仍需双重确认且 doctor 不下单。</li>
+              <li>输出人类可读报告与机器可读 exit code。</li>
+              <li>复用 BotConfig 和 broker market metadata，不建新配置框架。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>当前 .env.example 缺口、单边凭据和未知配置键均被明确报错。</p>
+          </article>
+
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge high">优先级 P1</span><span class="status info">3–5 人日</span></div>
+            <h3>3. 回测经济成本账本</h3>
+            <p class="why">把交易成本、funding、资金占用、借贷成本和 idle cash 收益统一纳入引擎，消除策略各自补公式造成的漂移。</p>
+            <ul>
+              <li><code>BacktestResult</code> 保留 gross 与每项 cost series。</li>
+              <li>支持 cash-secured、futures margin、long/short collateral 三种最小模型。</li>
+              <li>自动输出 0.5× / 1× / 2× 成本敏感度。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>P6 修正可由通用引擎重现；不同策略报告可核对到同一净收益恒等式。</p>
+          </article>
+
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge high">优先级 P1</span><span class="status info">3–5 人日</span></div>
+            <h3>4. Research Run Manifest + Decision Registry</h3>
+            <p class="why">每次正式研究自动生成一个小型 JSON manifest，避免“这张图用的哪版数据、哪段 OOS、工作区是否脏”靠记忆。</p>
+            <ul>
+              <li>记录 git SHA / dirty、data hash/as-of、universe version、参数、split 身份。</li>
+              <li>记录成本口径、leak scan verdict、关键指标和 decision record 链接。</li>
+              <li>从 manifests 生成管理层索引，不替代现有 markdown 决策记录。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>任何 headline 指标可一跳定位到代码、数据、成本和样本身份；released holdout 会自动标为已污染。</p>
+          </article>
+
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge medium">优先级 P1</span><span class="status info">2–4 人日</span></div>
+            <h3>5. Universe / Data Quality Validator</h3>
+            <p class="why">把已有合同变成加载时的机械校验，优先解决 country / sector ETF 的 point-in-time 与数据缺口风险。</p>
+            <ul>
+              <li>检查 required fields、start/end date、重复、ticker change、覆盖期和 stale gaps。</li>
+              <li>输出 universe fingerprint 写入 manifest。</li>
+              <li>按“error / warning / diagnostic”分级，避免阻断探索性 notebook。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>当前两份不完整 universe CSV 会失败并给出可操作字段清单。</p>
+          </article>
+
+          <article class="card feature">
+            <div class="feature-meta"><span class="badge medium">优先级 P2</span><span class="status info">3–5 人日</span></div>
+            <h3>6. Shadow Execution Drift Monitor</h3>
+            <p class="why">在 demo/paper 阶段持续比较目标、订单、成交和实际仓位，让执行误差在进入实盘讨论前被量化。</p>
+            <ul>
+              <li>按 leg 记录 target/current/drift、延迟、拒单、滑点与未成交。</li>
+              <li>超容差只 halt + alert，不自动加风险追单。</li>
+              <li>先写 SQLite / HTML 日报，暂不引入消息平台或监控栈。</li>
+            </ul>
+            <p class="feature-end"><strong>验收：</strong>连续 30 个 paper rebalance 有完整对账，任何残留仓位和部分成交都可追溯。</p>
+          </article>
+        </div>
+
+        <div class="note stop-note" style="margin-top:18px">
+          <strong>不建议现在做：</strong>新 broker 插件体系、微服务化、通用策略 DSL、实时大屏、自动实盘开关、复杂配置注册中心。当前瓶颈是正确性闭环，不是扩展点数量。
+        </div>
+      </section>
+
+      <section id="evidence">
+        <h2>审查证据与验证结果</h2>
+        <p class="section-intro">以下结果来自当前本地快照。所有命令均为离线或只读检查，没有连接交易所、没有调用外部账户、没有修改 raw/private 数据。</p>
+
+        <div class="grid grid-4">
+          <div class="card metric"><b>207</b><span>pytest 全部通过</span></div>
+          <div class="card metric"><b>26</b><span>src/tests Ruff 问题</span></div>
+          <div class="card metric"><b>28</b><span>notebooks</span></div>
+          <div class="card metric"><b>34</b><span>test files</span></div>
+        </div>
+
+        <table class="evidence-table" style="margin-top:18px">
+          <thead><tr><th>检查</th><th>结果</th><th>解读</th></tr></thead>
+          <tbody>
+            <tr><td><code>pytest -q</code></td><td><span class="status go">PASS · 207</span></td><td>覆盖研究回测、funding、holdout、CV、执行 risk/store/runner 等；不能替代未覆盖的实际持仓 reconciliation 场景。</td></tr>
+            <tr><td><code>ruff check .</code></td><td><span class="status stop">FAIL · 162</span></td><td>大量来自 notebooks/scripts；说明当前“完成前 Ruff 通过”并未机械执行。</td></tr>
+            <tr><td><code>ruff check src tests</code></td><td><span class="status conditional">FAIL · 26</span></td><td>核心范围更可控，其中 14 项可自动修复。</td></tr>
+            <tr><td>Leakage scanner · 标准策略 notebooks</td><td>0 blocker / 0 warning / 32 info</td><td>自动结果干净，但 DBMF full-sample vol 风险来自人工 checklist 与项目 backlog。</td></tr>
+            <tr><td>Leakage scanner · crypto</td><td>1 blocker / 1 warning / 50 info</td><td>人工追踪后分别是 forward label 与诊断 CI，不是 confirmed signal leakage。</td></tr>
+            <tr><td>Leakage scanner · src/scripts</td><td>1 blocker / 7 warning / 83 info</td><td>最高命中多为 forward-return scoring / rolling diagnostic；实际风险记录在本报告 R-02～R-07。</td></tr>
+            <tr><td>高置信 secret 模式扫描</td><td><span class="status go">无命中</span></td><td>不代表所有低熵凭据都不存在，但当前 tracked text 未见典型 API key / private key。</td></tr>
+            <tr><td>本地 Markdown 链接</td><td><span class="status go">全部可解析</span></td><td>文档导航基础良好。</td></tr>
+            <tr><td>Notebook output audit</td><td><span class="status conditional">2 本违规</span></td><td>Fed / Iran event studies 带 outputs 与 execution counts。</td></tr>
+            <tr><td>零目标离线复现</td><td><span class="status stop">确认</span></td><td><code>rows=0, empty=True, rebalance_on_empty_returns=[]</code>。</td></tr>
+            <tr><td>配置 fail-open 离线复现</td><td><span class="status stop">确认</span></td><td><code>max_gros</code> 静默回默认，<code>"false"</code> 被转为 True。</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:26px">仓库规模快照</h3>
+        <div class="grid grid-3">
+          <div class="card metric"><b>50 / 5,906</b><span>research Python files / lines</span></div>
+          <div class="card metric"><b>20 / 1,425</b><span>execution Python files / lines</span></div>
+          <div class="card metric"><b>34 / 3,101</b><span>test files / lines</span></div>
+          <div class="card metric"><b>3 / 2,070</b><span>scripts / lines</span></div>
+          <div class="card metric"><b>275</b><span>notebook code cells</span></div>
+          <div class="card metric"><b>19 / 3,083</b><span>Markdown docs / lines</span></div>
+        </div>
+      </section>
+
+      <section id="appendix">
+        <h2>范围、方法与限制</h2>
+        <div class="grid grid-2">
+          <article class="card padded">
+            <h3>审查范围</h3>
+            <ul class="compact-list">
+              <li><code>src/alpha_lab</code>：数据、特征、分析、回测、组合、ML/CV。</li>
+              <li><code>src/quant_bot_manager</code>：broker、runner、risk、store、CLI/UI。</li>
+              <li>tests、notebooks、scripts、configs、contracts、decision records、skills。</li>
+              <li>基于 main commit <code>304b9053…</code>，并包含当前未提交的 QQQ/congress/agent 工作。</li>
+            </ul>
+          </article>
+          <article class="card padded">
+            <h3>工作区注意事项</h3>
+            <p>审查开始时工作区已非 clean，包括 congress 配置、QQQ put-write、congress analytics/tests、skills 等未提交内容。本报告只读取和分析这些内容，没有改写或整理它们。</p>
+            <p>因此，针对未提交代码的结论是“提交前建议”，不能当作 main 上已发布缺陷。</p>
+          </article>
+          <article class="card padded">
+            <h3>方法</h3>
+            <ul class="compact-list">
+              <li>架构与依赖方向检查。</li>
+              <li>测试、Ruff、secret、本地链接、notebook 输出与规模检查。</li>
+              <li>项目 leakage skill 静态扫描 + 手工 cardinal-sin checklist。</li>
+              <li>执行状态机、门禁、锁、配置、打包的路径级追踪。</li>
+              <li>两个高风险行为的最小离线复现。</li>
+            </ul>
+          </article>
+          <article class="card padded">
+            <h3>限制</h3>
+            <ul class="compact-list">
+              <li>没有使用真实交易所 sandbox / demo API 做端到端成交测试。</li>
+              <li>没有重跑全部数据下载或所有 notebook，因此未验证外部数据可重复性。</li>
+              <li>静态泄漏扫描是启发式；最终 verdict 结合人工数据流追踪。</li>
+              <li>工期是单工程师的相对估算，未含外部 API 与市场规则变更。</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <strong>审查判断边界：</strong>“未发现已确认泄漏”不等于“绩效已可投入资金”；样本外身份、成本、滑点、容量和执行闭环必须同时满足。本文不是投资建议，也不授权任何真实资金交易。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    alpha_lab repository review · 2026-07-13 · Standalone HTML report · no external assets
+  </footer>
+
+  <script>
+    (function () {
+      var buttons = Array.prototype.slice.call(document.querySelectorAll(".filter"));
+      var findings = Array.prototype.slice.call(document.querySelectorAll(".finding"));
+
+      function applyFilter(value) {
+        buttons.forEach(function (button) {
+          button.classList.toggle("active", button.getAttribute("data-filter") === value);
+        });
+        findings.forEach(function (item) {
+          var show = value === "all"
+            || item.getAttribute("data-level") === value
+            || item.getAttribute("data-domain") === value;
+          item.classList.toggle("hidden", !show);
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          applyFilter(button.getAttribute("data-filter"));
+        });
+      });
+
+      document.getElementById("expand-all").addEventListener("click", function () {
+        findings.forEach(function (item) {
+          if (!item.classList.contains("hidden")) item.open = true;
+        });
+      });
+      document.getElementById("collapse-all").addEventListener("click", function () {
+        findings.forEach(function (item) { item.open = false; });
+      });
+    }());
+  </script>
+</body>
+</html>

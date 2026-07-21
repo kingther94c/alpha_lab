@@ -45,4 +45,4 @@ def rebalance_dates(index: pd.DatetimeIndex, freq: str = "ME") -> pd.DatetimeInd
         return index
     s = pd.Series(index, index=index)
     last_in_period = s.resample(freq).last().dropna()
-    return pd.DatetimeIndex(last_in_period.values)
+    return pd.DatetimeIndex(last_in_period.tolist())

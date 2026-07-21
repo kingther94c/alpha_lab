@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>投资组合调整研究报告｜2026-07-03</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --paper: #ffffff;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f766e;
+      --accent-soft: #ecfdf5;
+      --warn: #9a6700;
+      --warn-soft: #fff8db;
+      --danger: #b42318;
+      --danger-soft: #fff1f0;
+      --blue: #1d4ed8;
+      --blue-soft: #eff6ff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
+        "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.65;
+    }
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 32px auto 64px;
+    }
+    .hero, .section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+    }
+    .hero { padding: 36px; }
+    .section { padding: 28px; margin-top: 20px; }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.18;
+      letter-spacing: -.03em;
+    }
+    h2 { margin: 0 0 16px; font-size: 23px; }
+    h3 { margin: 22px 0 8px; font-size: 17px; }
+    p { margin: 10px 0; }
+    .lede { max-width: 850px; color: #334155; font-size: 18px; }
+    .meta { color: var(--muted); font-size: 13px; margin-top: 18px; }
+    .verdict {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border-left: 5px solid var(--accent);
+      border-radius: 10px;
+      background: var(--accent-soft);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .metric {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fafcff;
+    }
+    .metric span { display: block; color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 22px; }
+    .callout {
+      margin: 16px 0;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid;
+    }
+    .callout.warn { color: #6b4f00; background: var(--warn-soft); border-color: #efd879; }
+    .callout.danger { color: #7a271a; background: var(--danger-soft); border-color: #f7b5ae; }
+    .callout.info { color: #1e3a8a; background: var(--blue-soft); border-color: #bfdbfe; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 11px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: #475569;
+      background: #f8fafc;
+      font-size: 12px;
+      letter-spacing: .02em;
+    }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr:last-child td { border-bottom: 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 7px 0; }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .pill.do { color: #065f46; background: #d1fae5; }
+    .pill.wait { color: #92400e; background: #fef3c7; }
+    .small { color: var(--muted); font-size: 13px; }
+    a { color: var(--blue); }
+    .footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero, .section { padding: 22px; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+    @media print {
+      body { background: white; }
+      main { width: 100%; margin: 0; }
+      .hero, .section { box-shadow: none; break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <div class="eyebrow">Portfolio Research · Decision Support</div>
+    <h1>投资组合调整研究报告</h1>
+    <p class="lede">
+      基于 2026-07-03 IBKR 持仓快照、组合风险报告及截至 2026-07-02 的公开宏观数据，
+      评估当前集中度、跨资产配置、FX 对冲与期权盲点，并提出分阶段的调整方案。
+    </p>
+    <div class="verdict">
+      核心结论：先通过自融资轮换降低科技和韩国集中度；暂缓机械补足 FI、FX 杠杆。
+      在补齐期权 Greeks、刷新 FX 模型和完成保证金压力测试前，不应扩大组合总风险。
+    </div>
+    <div class="grid">
+      <div class="metric"><span>Funded AUM</span><strong>US$1.257m</strong></div>
+      <div class="metric"><span>快速预估波动率</span><strong>26.00%</strong></div>
+      <div class="metric"><span>1 日 95% VaR</span><strong>US$33.9k</strong></div>
+      <div class="metric"><span>Top-5 集中度</span><strong>67.6%</strong></div>
+    </div>
+    <p class="meta">
+      报告日期：2026-07-03（Asia/Singapore）｜研究性质：只读建议，不构成订单或自动交易授权
+    </p>
+  </header>
+
+  <section class="section">
+    <h2>1. 数据范围与重要限制</h2>
+    <table>
+      <thead>
+        <tr><th>数据层</th><th>时点</th><th>判断</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>IBKR 持仓</td><td>2026-07-03 05:03 SGT</td><td>新鲜，可用于仓位盘点</td></tr>
+        <tr><td>绩效</td><td>截至 2026-07-01</td><td>比持仓慢约两个交易日</td></tr>
+        <tr><td>Regime</td><td>截至 2026-06-30</td><td>低信心，宏观与市场层发生分歧</td></tr>
+        <tr><td>FX hedge advisor</td><td>模型运行 2026-06-05</td><td>缓存 27 天；表内合约到期日为 2026-06-17</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger">
+      <strong>风险报表并非完整风险：</strong>
+      所有期权因缺失 broker model Greeks 被排除；IGV、XCSI 的波动率被记为 0；
+      FX 波动率在配置中被强制设为 0。因而 26% 快速波动率既可能高估 SOXX 方向性风险，
+      也会低估短 put、FX 和未映射仓位的尾部风险。
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>2. 当前组合的主要矛盾</h2>
+    <table>
+      <thead>
+        <tr><th>维度</th><th class="num">当前</th><th class="num">政策参考</th><th>结论</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>股票内科技</td><td class="num">40.28%</td><td class="num">31.53%</td><td>最主要的集中风险</td></tr>
+        <tr><td>股票内韩国</td><td class="num">7.18%</td><td class="num">1.80%</td><td>FLKR 与宽基基金重复暴露</td></tr>
+        <tr><td>股票内美国</td><td class="num">66.59%</td><td class="num">62.48%</td><td>中度超配</td></tr>
+        <tr><td>股票内欧洲</td><td class="num">9.19%</td><td class="num">14.08%</td><td>明显低配</td></tr>
+        <tr><td>SOXX 快速波动率</td><td class="num">72.00%</td><td class="num">—</td><td>单仓贡献 8.9 个百分点组合波动</td></tr>
+        <tr><td>现金 / BOXX</td><td class="num">8.63%</td><td class="num">2.50%</td><td>考虑期货和短期权保证金，不能机械压低</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      组合 YTD 美元 TWR 为 10.61%，略高于同期 SPY 的 9.94%；但 1 年 TWR 为 18.76%，
+      低于 SPY 的 22.04%，而组合 1 年 Sharpe 仅 0.67。当前问题不是没有收益，
+      而是为收益承担了偏高且集中的风险。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>3. 建议立即执行的自融资股票轮换</h2>
+    <p>
+      <span class="pill do">优先</span>
+      下列交易不增加股票总金额，目标是先修复结构，而不是择时清仓。
+    </p>
+    <table>
+      <thead>
+        <tr><th>操作</th><th class="num">数量 / 目标金额</th><th class="num">估算金额</th><th>理由</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>卖出 FLKR</td><td class="num">700 股</td><td class="num">-US$41.4k</td><td>消除韩国直接超配，保留宽基基金中的韩国暴露</td></tr>
+        <tr><td>减持 SOXX</td><td class="num">75 股</td><td class="num">-US$42.6k</td><td>降低最大风险贡献；保留 200 股覆盖两张未到期 short call</td></tr>
+        <tr><td>卖出 IGV</td><td class="num">200 股</td><td class="num">-US$18.8k</td><td>与科技仓重复，且当前风险报表将其波动率错误记为 0</td></tr>
+        <tr><td>增持 IEUR</td><td class="num">目标 US$45k</td><td class="num">+US$45.0k</td><td>补欧洲、金融、工业和医疗</td></tr>
+        <tr><td>增持 VEA</td><td class="num">目标 US$35k</td><td class="num">+US$35.0k</td><td>补日本、加拿大、澳新及欧洲</td></tr>
+        <tr><td>新增 XLF</td><td class="num">目标 US$12k</td><td class="num">+US$12.0k</td><td>修复金融低配</td></tr>
+        <tr><td>新增 XLI</td><td class="num">目标 US$6k</td><td class="num">+US$6.0k</td><td>修复工业低配</td></tr>
+        <tr><td>新增 XLV</td><td class="num">目标 US$4.8k</td><td class="num">+US$4.8k</td><td>修复医疗低配</td></tr>
+        <tr><td><strong>合计</strong></td><td></td><td class="num"><strong>约 US$0</strong></td><td>自融资，不额外消耗现金</td></tr>
+      </tbody>
+    </table>
+
+    <h3>轮换后的估算效果</h3>
+    <table>
+      <thead>
+        <tr><th>维度</th><th class="num">调整前</th><th class="num">调整后估算</th><th class="num">政策参考</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>科技 / 股票</td><td class="num">40.28%</td><td class="num">33.15%</td><td class="num">31.53%</td></tr>
+        <tr><td>美国 / 已分类股票</td><td class="num">66.59%</td><td class="num">62.35%</td><td class="num">62.48%</td></tr>
+        <tr><td>韩国 / 已分类股票</td><td class="num">7.18%</td><td class="num">3.01%</td><td class="num">1.80%</td></tr>
+        <tr><td>欧洲 / 已分类股票</td><td class="num">9.19%</td><td class="num">16.05%</td><td class="num">14.08%</td></tr>
+        <tr><td>金融 / 股票</td><td class="num">11.57%</td><td class="num">14.24%</td><td class="num">16.14%</td></tr>
+        <tr><td>工业 / 股票</td><td class="num">8.76%</td><td class="num">10.13%</td><td class="num">10.79%</td></tr>
+      </tbody>
+    </table>
+
+    <p class="small">
+      在固定相关性和线性风险贡献的粗略假设下，该轮换可能将快速波动率降至约 22%–24%，
+      1 日 95% VaR 降至约 US$29k–31k。由于期权、FX 和部分 ETF 映射缺失，
+      该数字仅用于方向判断，不能替代重跑风险报告。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>4. 其他资产类别建议</h2>
+    <table>
+      <thead>
+        <tr><th>资产类别</th><th>建议</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MACRO / DBMF</td>
+          <td><span class="pill do">增持至 7.5%</span></td>
+          <td>从 BOXX 转约 US$17.3k，约 135 股；现金仍约 7.25%，保留保证金缓冲。</td>
+        </tr>
+        <tr>
+          <td>固定收益</td>
+          <td><span class="pill wait">暂不补满</span></td>
+          <td>当前 73.93% 的 10 年等值敞口低于 100% 政策值，但通胀与增长信号冲突，不宜一次补足。</td>
+        </tr>
+        <tr>
+          <td>商品</td>
+          <td><span class="pill">维持</span></td>
+          <td>当前 8.79% 位于静态 10% 与动态专家 5% 之间；COPX 已贡献较高风险，不追补。</td>
+        </tr>
+        <tr>
+          <td>现金 / BOXX</td>
+          <td><span class="pill">保留 7% 左右</span></td>
+          <td>短 put、期货及 FX 组合需要流动性；2.5% 静态政策值不适合在保证金数据缺失时机械执行。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <strong>固定收益的下一步：</strong>
+      只有在补齐 Greeks、FX 风险并通过保证金压力测试后，才考虑先增加 2 张 ZF，
+      约增加 US$116k、即 9.2 个百分点的 10 年等值 FI 敞口。相比直接加 ZN，
+      ZF 对长端通胀和期限溢价冲击更温和。
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>5. FX：当前最不能机械执行的政策漂移</h2>
+    <p>
+      风险表显示 FX 比 100% 静态目标低配 26.36%，但 FX advisor 的真正政策参数是
+      <strong>只对冲 70% 的相关 USD/SGD 暴露</strong>。此外，advisor 使用的是
+      2026-06-05 的较高 AUM，且合约到期日已经过去。
+    </p>
+
+    <div class="callout warn">
+      因此不能依据 “FX -26.36%” 增仓。用旧 beta 对当前 AUM 粗略缩放，方向反而是减仓和换篮子。
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>货币期货</th><th class="num">当前合约</th><th class="num">旧 beta 按当前 AUM 缩放的诊断值</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>EUR</td><td class="num">2</td><td class="num">约 1</td></tr>
+        <tr><td>GBP</td><td class="num">2</td><td class="num">约 1</td></tr>
+        <tr><td>AUD</td><td class="num">6</td><td class="num">约 2</td></tr>
+        <tr><td>NZD</td><td class="num">1</td><td class="num">0（不在模型篮子）</td></tr>
+        <tr><td>JPY</td><td class="num">0</td><td class="num">约 1</td></tr>
+        <tr><td>CNH</td><td class="num">0</td><td class="num">约 2</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      该诊断组合约比当前 FX gross 少 US$280k，但不应直接作为订单：
+      必须先用当前 AUM、当前 spot、正确合约月份重新拟合，并比较对冲质量、
+      年化 carry、保证金和二阶 SGD 换算风险。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>6. 期权风险的补充估算</h2>
+    <p>
+      使用报告中的期权价格、2026-07-02 标的价格和 3.8% 无风险利率进行简化
+      Black–Scholes 反推，得到以下方向性估算：
+    </p>
+    <table>
+      <thead>
+        <tr><th>标的</th><th class="num">期权合计 delta</th><th class="num">约当美元 delta</th><th>含义</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>SOXX</td><td class="num">-75 股</td><td class="num">-US$42.6k</td><td>put spread 与 short call 降低现货方向风险</td></tr>
+        <tr><td>QQQ</td><td class="num">+8.7 股</td><td class="num">+US$6.2k</td><td>short put 增加下跌时的多头暴露</td></tr>
+        <tr><td>SPY</td><td class="num">+17.3 股</td><td class="num">+US$12.9k</td><td>两张 short put 带来负凸性与尾部风险</td></tr>
+      </tbody>
+    </table>
+    <p class="small">
+      这是近似 delta，不包含波动率曲面、gamma、vega、提前行权和 bid/ask。
+      减持 SOXX 75 股后仍保留 200 股，可覆盖两张重叠存续的 SOXX short call；
+      在重构期权前不建议进一步减至 200 股以下。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>7. 宏观背景与为何不宜追杠杆</h2>
+    <ul>
+      <li>
+        美国 2026 年 5 月 PCE 同比 4.1%，核心 PCE 3.4%，通胀明显高于 2% 目标。
+      </li>
+      <li>
+        Fed 6 月维持 3.5%–3.75% 目标区间；6 月 SEP 对 2026 年 PCE 的中位预测为 3.6%，
+        年末政策利率中位数为 3.8%。
+      </li>
+      <li>
+        6 月非农只增加 5.7 万，失业率 4.2%，显示增长边际转弱但尚非衰退。
+      </li>
+      <li>
+        2026-07-02 美国国债收益率约为 5 年 4.23%、10 年 4.49%，10 年实际收益率约 2.26%。
+        Duration 的前瞻收益改善，但通胀尾部仍要求分批进入。
+      </li>
+    </ul>
+    <p>
+      这与组合 regime 报告完全一致：宏观层判断增长向上、通胀向上；市场层判断增长向上、
+      通胀向下，最终信心低且存在方法分歧。因此不应把 Goldilocks 标签当作加满风险的依据。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>8. 执行顺序与止步条件</h2>
+    <ol>
+      <li><strong>先修数据：</strong>补抓 option model Greeks，修复 IGV/XCSI 风险映射，重跑 FX advisor。</li>
+      <li><strong>执行股票自融资轮换：</strong>不增加股票总仓位，分 2–3 批以控制滑点。</li>
+      <li><strong>DBMF 回到政策值：</strong>从 BOXX 转约 US$17.3k，现金保持约 7%。</li>
+      <li><strong>重跑完整风险：</strong>同时纳入期权 delta/gamma/vega、FX 与 SGD wealth risk。</li>
+      <li><strong>再决定 FI：</strong>仅在快速波动率不高于 23%、1 日 VaR 不高于 NAV 的 2.5%，
+          且保证金压力测试通过时，分批增加 ZF。</li>
+    </ol>
+
+    <div class="callout danger">
+      <strong>止步条件：</strong>
+      若更新后快速波动率仍高于 25%、短期权压力损失超过可用流动性，
+      或 FX 模型的新旧目标差异超过 AUM 的 10%，则暂停新增风险，只做减集中和风险修复。
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>9. 来源与方法</h2>
+    <ul>
+      <li>本地组合报告：portfolio_dashboard_report.html，生成于 2026-07-03。</li>
+      <li>本地持仓：live_ibkr_position_report.csv，持仓时点 2026-07-03 05:03 SGT。</li>
+      <li>
+        <a href="https://www.bea.gov/news/2026/personal-income-and-outlays-may-2026">BEA：Personal Income and Outlays, May 2026</a>
+      </li>
+      <li>
+        <a href="https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm">Federal Reserve：2026-06-17 FOMC Statement</a>
+      </li>
+      <li>
+        <a href="https://www.federalreserve.gov/monetarypolicy/fomcprojtabl20260617.htm">Federal Reserve：June 2026 Summary of Economic Projections</a>
+      </li>
+      <li>
+        <a href="https://www.bls.gov/news.release/archives/empsit_07022026.htm">BLS：Employment Situation, June 2026</a>
+      </li>
+      <li>
+        <a href="https://home.treasury.gov/">U.S. Treasury：Daily Treasury Rates, 2026-07-02</a>
+      </li>
+      <li>
+        <a href="https://www.ishares.com/us/literature/fact-sheet/soxx-ishares-semiconductor-etf-fund-fact-sheet-en-us.pdf">iShares：SOXX Fund Fact Sheet</a>
+      </li>
+    </ul>
+    <p class="small">
+      本报告未纳入税务、实际佣金、bid/ask、期货初始/维持保证金、账户级 excess liquidity
+      及个别产品交易限制。所有金额均为研究目标值，不是订单。
+    </p>
+  </section>
+
+  <div class="footer">
+    alpha_lab research note · generated 2026-07-03 · no live orders placed
+  </div>
+</main>
+</body>
+</html>

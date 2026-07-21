@@ -17,6 +17,7 @@ def load_prices(
     *,
     field: str = "Close",
     auto_adjust: bool = True,
+    threads: bool = True,
 ) -> pd.DataFrame:
     """Download a wide DataFrame of prices (index=date, columns=ticker).
 
@@ -27,6 +28,7 @@ def load_prices(
     field : which OHLCV field to keep. Defaults to ``"Close"``; with
         ``auto_adjust=True`` (default) this is split/dividend-adjusted.
     auto_adjust : passed through to yfinance.
+    threads : enable yfinance's parallel ticker downloads.
 
     Returns
     -------
@@ -41,6 +43,7 @@ def load_prices(
         auto_adjust=auto_adjust,
         progress=False,
         group_by="column",
+        threads=threads,
     )
     if raw.empty:
         return pd.DataFrame(columns=sorted(tickers))

@@ -1,0 +1,24 @@
+{
+  "last_allowed": "2021-12-31",
+  "development_end": "2012-12-31",
+  "validation_start": "2013-01-01",
+  "trading_cost_bps_per_unit": 5.0,
+  "primary_window": {
+    "months": [
+      1,
+      4,
+      7,
+      10
+    ],
+    "start_trading_day": 7,
+    "length": 8
+  },
+  "event_tests": 195,
+  "strategy_rows": 517,
+  "fdr_q_lt_10pct": 0,
+  "fdr_q_lt_10pct_both_subperiods_positive": 0,
+  "relative_to_spy_fdr_q_lt_10pct": 0,
+  "relative_to_spy_fdr_q_lt_10pct_both_subperiods_positive": 0,
+  "robust_tilts_that_also_beat_spy_drawdown": 4,
+  "verdict": "固定财报季日历代理不足以形成可接受的独立 ETF alpha；值得继续的是使用真实、事前可知的高关注公司公告集群日期。"
+}

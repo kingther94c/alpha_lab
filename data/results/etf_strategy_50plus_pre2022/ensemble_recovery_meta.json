@@ -1,0 +1,12 @@
+{
+  "trial_count": 1504,
+  "full_gfc_trial_count": 848,
+  "credit_trial_count": 656,
+  "original_gate_count": 329,
+  "relaxed_5pct_gate_count": 1122,
+  "avoided_5pct_drawdown_count": 442,
+  "hard_20d_recovery_count": 0,
+  "original_joint_count": 0,
+  "relaxed_joint_count": 64,
+  "last_observation": "2021-12-31"
+}

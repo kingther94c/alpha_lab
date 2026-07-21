@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alpha_lab.backtest.vector import run_backtest
+from alpha_lab.backtest.vector import run_backtest, run_drift_backtest
 
 
 def _constant_prices(daily_ret: float, n: int = 250, cols: list[str] | None = None) -> pd.DataFrame:
@@ -72,3 +72,103 @@ def test_equity_curve_property():
     eq = res.equity
     assert eq.iloc[0] == pytest.approx(1.0)
     assert eq.iloc[-1] > 1.0
+
+
+def test_drift_backtest_trades_next_close_and_earns_following_return():
+    idx = pd.bdate_range("2024-01-02", periods=4)
+    prices = pd.DataFrame({"A": [100.0, 110.0, 121.0, 121.0]}, index=idx)
+    targets = pd.DataFrame({"A": [1.0]}, index=[idx[0]])
+
+    result = run_drift_backtest(targets, prices, trading_bps=0.0)
+
+    assert result.decision_to_trade.loc[idx[0]] == idx[1]
+    assert result.returns.loc[idx[1]] == pytest.approx(0.0)
+    assert result.returns.loc[idx[2]] == pytest.approx(0.10)
+
+
+def test_drift_backtest_weights_drift_between_rebalances():
+    idx = pd.bdate_range("2024-01-02", periods=4)
+    prices = pd.DataFrame(
+        {"A": [100.0, 100.0, 200.0, 200.0], "B": [100.0] * 4},
+        index=idx,
+    )
+    targets = pd.DataFrame({"A": [0.5], "B": [0.5]}, index=[idx[0]])
+
+    result = run_drift_backtest(targets, prices, trading_bps=0.0)
+
+    assert result.pre_trade_weights.loc[idx[2], "A"] == pytest.approx(2 / 3)
+    assert result.pre_trade_weights.loc[idx[2], "B"] == pytest.approx(1 / 3)
+
+
+def test_drift_backtest_threshold_compares_with_drifted_weights():
+    idx = pd.bdate_range("2024-01-02", periods=5)
+    prices = pd.DataFrame({"A": [100.0, 100.0, 102.0, 102.0, 102.0], "B": [100.0] * 5}, index=idx)
+    targets = pd.DataFrame(
+        {"A": [0.5, 0.5], "B": [0.5, 0.5]},
+        index=[idx[0], idx[2]],
+    )
+
+    result = run_drift_backtest(
+        targets,
+        prices,
+        trading_bps=0.0,
+        rebalance_threshold=0.01,
+    )
+
+    assert result.trade_flags.loc[idx[1]]
+    assert not result.trade_flags.loc[idx[3]]
+
+
+def test_drift_backtest_charges_actual_non_cash_notional():
+    idx = pd.bdate_range("2024-01-02", periods=4)
+    prices = pd.DataFrame({"A": [100.0] * 4, "B": [100.0] * 4}, index=idx)
+    targets = pd.DataFrame(
+        {"A": [1.0, 0.0], "B": [0.0, 1.0]},
+        index=[idx[0], idx[1]],
+    )
+
+    result = run_drift_backtest(targets, prices, trading_bps=10.0)
+
+    assert result.traded_notional.loc[idx[1]] == pytest.approx(1.0 / 1.001)
+    assert result.traded_notional.loc[idx[2]] == pytest.approx(2.0 / 1.001, rel=1e-6)
+    assert result.costs.loc[idx[2]] > result.costs.loc[idx[1]]
+    assert np.allclose(result.weights.sum(axis=1), 1.0)
+
+
+def test_drift_backtest_cash_earns_provided_return_before_first_trade():
+    idx = pd.bdate_range("2024-01-02", periods=3)
+    prices = pd.DataFrame({"A": [100.0] * 3}, index=idx)
+    targets = pd.DataFrame({"A": [1.0]}, index=[idx[1]])
+    cash_returns = pd.Series([0.0, 0.001, 0.001], index=idx)
+
+    result = run_drift_backtest(
+        targets,
+        prices,
+        trading_bps=0.0,
+        cash_returns=cash_returns,
+    )
+
+    assert result.returns.loc[idx[1]] == pytest.approx(0.001)
+    assert result.returns.loc[idx[2]] == pytest.approx(0.001)
+    assert result.weights.loc[idx[2], "A"] == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize("bad_price", [np.nan, 0.0, -1.0, np.inf])
+def test_drift_backtest_rejects_nonpositive_or_nonfinite_prices(bad_price):
+    idx = pd.bdate_range("2024-01-02", periods=3)
+    prices = pd.DataFrame({"A": [100.0, bad_price, 101.0]}, index=idx)
+    targets = pd.DataFrame({"A": [1.0]}, index=[idx[0]])
+
+    with pytest.raises(ValueError, match="finite and strictly positive"):
+        run_drift_backtest(targets, prices)
+
+
+def test_drift_backtest_preserves_timezone_in_decision_to_trade():
+    idx = pd.bdate_range("2024-01-02", periods=3, tz="UTC")
+    prices = pd.DataFrame({"A": [100.0, 100.0, 101.0]}, index=idx)
+    targets = pd.DataFrame({"A": [1.0]}, index=[idx[0]])
+
+    result = run_drift_backtest(targets, prices, trading_bps=0.0)
+
+    assert result.decision_to_trade.loc[idx[0]] == idx[1]
+    assert result.decision_to_trade.dt.tz == idx.tz

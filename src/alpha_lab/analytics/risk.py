@@ -16,9 +16,44 @@ def cov_matrix(returns: pd.DataFrame, periods: int = 252) -> pd.DataFrame:
 
 def portfolio_vol(weights: pd.Series | np.ndarray, cov: pd.DataFrame) -> float:
     """Annualized portfolio volatility given weights and covariance."""
-    w = np.asarray(weights, dtype=float)
+    if isinstance(weights, pd.Series) and isinstance(cov, pd.DataFrame):
+        missing = cov.index.difference(weights.index)
+        if len(missing):
+            raise ValueError(f"weights missing covariance labels: {missing.tolist()}")
+        w = weights.reindex(cov.index).to_numpy(dtype=float)
+    else:
+        w = np.asarray(weights, dtype=float)
     cov_arr = cov.values if isinstance(cov, pd.DataFrame) else np.asarray(cov)
     return float(np.sqrt(w @ cov_arr @ w))
+
+
+def geometric_portfolio_vol(
+    weights: pd.Series | np.ndarray,
+    cov_short: pd.DataFrame | np.ndarray,
+    cov_long: pd.DataFrame | np.ndarray,
+) -> float:
+    """Geometric mean of portfolio volatility from two covariance windows."""
+    short_vol = portfolio_vol(weights, cov_short)
+    long_vol = portfolio_vol(weights, cov_long)
+    return float(np.sqrt(short_vol * long_vol))
+
+
+def geometric_realized_vol(
+    returns: pd.Series,
+    *,
+    short_window: int = 21,
+    long_window: int = 63,
+    periods: int = 252,
+) -> float:
+    """Geometric mean of short- and long-window realized volatility."""
+    if short_window < 2 or long_window < short_window:
+        raise ValueError("windows must satisfy 2 <= short_window <= long_window")
+    clean = returns.dropna()
+    if len(clean) < long_window:
+        return float("nan")
+    short_vol = float(clean.tail(short_window).std() * np.sqrt(periods))
+    long_vol = float(clean.tail(long_window).std() * np.sqrt(periods))
+    return float(np.sqrt(short_vol * long_vol))
 
 
 def risk_contributions(weights: pd.Series, cov: pd.DataFrame) -> pd.Series:

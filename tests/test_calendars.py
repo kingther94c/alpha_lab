@@ -40,3 +40,12 @@ def test_rebalance_dates_daily_returns_index():
 def test_rebalance_dates_empty_index():
     empty = pd.DatetimeIndex([])
     assert len(rebalance_dates(empty, freq="ME")) == 0
+
+
+def test_rebalance_dates_preserves_timezone():
+    idx = pd.date_range("2024-07-01", "2024-08-30", freq="B", tz="America/New_York")
+
+    out = rebalance_dates(idx, freq="ME")
+
+    assert str(out.tz) == "America/New_York"
+    assert out[-1] == pd.Timestamp("2024-08-30", tz="America/New_York")

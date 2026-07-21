@@ -1,6 +1,9 @@
 """Sector momentum signal construction and view expression helpers."""
 
+import numpy as np
 import pandas as pd
+
+from alpha_lab.data.calendars import rebalance_dates
 
 UNIVERSE_COLUMNS = [
     "sector",
@@ -21,8 +24,54 @@ def sector_momentum_signal(
     skip_months: int = 1,
 ) -> pd.DataFrame:
     """Compute cross-sectional sector momentum from original sector ETF prices."""
-    monthly = prices.resample("ME").last()
+    month_ends = rebalance_dates(prices.index, freq="ME")
+    monthly = prices.loc[month_ends]
     return monthly.shift(skip_months) / monthly.shift(lookback_months) - 1
+
+
+def multi_horizon_momentum_signal(
+    prices: pd.DataFrame,
+    *,
+    lookback_days: tuple[int, ...] = (252, 126, 63),
+    skip_days: int = 21,
+) -> pd.DataFrame:
+    """Average cross-sectional ranks of several skip-period momentum horizons.
+
+    ``lookback_days`` identifies each return's older endpoint. For example,
+    ``lookback_days=(252, 126, 63)`` with ``skip_days=21`` measures the usual
+    12-1, 6-1, and 3-1 trailing returns: price at ``t-21`` divided by price at
+    ``t-252``, ``t-126``, and ``t-63`` respectively.
+    """
+    if not lookback_days or min(lookback_days) < 1:
+        raise ValueError("lookback_days must contain positive windows")
+    if skip_days < 0:
+        raise ValueError("skip_days must be >= 0")
+    if min(lookback_days) <= skip_days:
+        raise ValueError("every lookback window must be greater than skip_days")
+
+    ranked = []
+    for lookback in lookback_days:
+        trailing_return = prices.shift(skip_days) / prices.shift(lookback) - 1.0
+        ranked.append(trailing_return.rank(axis=1, pct=True))
+    return sum(ranked) / len(ranked)
+
+
+def volume_confirmation_signal(
+    prices: pd.DataFrame,
+    volumes: pd.DataFrame,
+    *,
+    short_window: int = 21,
+    long_window: int = 126,
+) -> pd.DataFrame:
+    """Trailing own-history z-score of short-term log dollar volume."""
+    if short_window < 2 or long_window < short_window:
+        raise ValueError("windows must satisfy 2 <= short_window <= long_window")
+    aligned_volume = volumes.reindex(index=prices.index, columns=prices.columns)
+    log_dollar_volume = np.log(prices * aligned_volume.replace(0.0, np.nan))
+    short_mean = log_dollar_volume.rolling(short_window, min_periods=short_window).mean()
+    long_mean = log_dollar_volume.rolling(long_window, min_periods=long_window).mean()
+    long_std = log_dollar_volume.rolling(long_window, min_periods=long_window).std()
+    return ((short_mean - long_mean) / long_std).replace([np.inf, -np.inf], np.nan)
 
 
 def top_bottom_view_weights(
