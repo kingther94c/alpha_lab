@@ -1,0 +1,15 @@
+{
+  "phase": "develop",
+  "flow_source": "https://farside.co.uk/bitcoin-etf-flow-all-data/",
+  "flow_sha256": "b7f3ef4be6e582c29389115a3ab7167b53f34bb238cde5d170a19bc39fea3400",
+  "flow_rows_used": 511,
+  "flow_first": "2024-01-11",
+  "flow_last": "2025-12-31",
+  "market_first": "2023-09-01",
+  "market_last": "2025-12-31",
+  "candidate_count": 113,
+  "eligible_count": 41,
+  "base_cost_bps": 15.0,
+  "stress_cost_bps": 30.0,
+  "publication_lag": "flow trade-date t -> feature available at t+1 close -> earns t+2 return"
+}

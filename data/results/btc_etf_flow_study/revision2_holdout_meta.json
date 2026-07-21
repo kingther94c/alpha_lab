@@ -1,0 +1,8 @@
+{
+  "frozen_candidate": "absorption_q70_hold5_ma50",
+  "frozen_at_utc": "2026-07-20T13:34:08Z",
+  "flow_last": "2026-07-17",
+  "market_last": "2026-07-19",
+  "evaluation_end_exclusive": "2026-07-20",
+  "publication_lag": "ETF date t available t+1 close; position earns no earlier than t+2"
+}

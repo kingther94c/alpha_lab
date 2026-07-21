@@ -1,0 +1,14 @@
+{
+  "candidate": "structural_scarcity_w365_qna_hold1_ma200",
+  "spec": {
+    "name": "structural_scarcity_w365_qna_hold1_ma200",
+    "family": "structural_scarcity",
+    "feature_window": 365,
+    "hold": 1,
+    "trend_window": 200,
+    "quantile": null,
+    "matched_control": "price_trend_ma200"
+  },
+  "selection_rule": "max min development/validation excess Sharpe; turnover tie-break",
+  "external_period_released": false
+}

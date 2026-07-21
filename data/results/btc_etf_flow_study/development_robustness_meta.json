@@ -1,0 +1,26 @@
+{
+  "candidate": "extreme_inflow_q80_hold10_ma100",
+  "spec": {
+    "name": "extreme_inflow_q80_hold10_ma100",
+    "family": "extreme_inflow_hold",
+    "flow_window": null,
+    "trend_window": 100,
+    "quantile": 0.8,
+    "hold": 10,
+    "matched_control": "price_trend_ma100"
+  },
+  "observed_validation_excess_cagr": 0.12033531722567603,
+  "observed_validation_excess_sharpe": 0.6038901860443892,
+  "fixed_spec_shift_p_value": 0.17372881355932204,
+  "fixed_spec_shift_percentile": 0.8280254777070064,
+  "observed_family_best_min_sharpe": 0.7612827022926184,
+  "familywise_shift_p_value": 0.23880597014925373,
+  "validation_block_bootstrap": {
+    "return_p05": -0.22124709104014004,
+    "return_p50": 0.10554154705433261,
+    "return_p95": 0.5952912132539355,
+    "sharpe_p05": -0.99210967935157,
+    "sharpe_p50": 0.5647782389381031,
+    "sharpe_p95": 2.11651956912615
+  }
+}

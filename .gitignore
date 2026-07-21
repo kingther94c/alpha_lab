@@ -36,10 +36,20 @@ data/raw/*
 !data/raw/.gitkeep
 data/interim/*
 !data/interim/.gitkeep
+!data/interim/btc_coinmetrics_onchain.csv
+!data/interim/btc_etf_flows_farside.csv
+!data/interim/eth_coinmetrics_onchain.csv
 data/features/*
 !data/features/.gitkeep
 data/results/*
 !data/results/.gitkeep
+!data/results/btc_etf_flow_study/
+!data/results/btc_etf_flow_study/**
+!data/results/btc_onchain_exchange_flow/
+!data/results/btc_onchain_exchange_flow/**
+!data/results/crypto_onchain_replication/
+!data/results/crypto_onchain_replication/**
 
 reports/*
 !reports/.gitkeep
+!reports/crypto_whale_etf_strategy_2026-07-20.html

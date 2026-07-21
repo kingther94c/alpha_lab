@@ -1,0 +1,5 @@
+{
+  "status": "post-hoc paper-monitor test; no untouched holdout",
+  "rule": "MA200 risk switch; 50% BTC normally and 100% when exchange supply is below trailing 365d mean",
+  "parameter_search": "none; 50% midpoint fixed before evaluation"
+}

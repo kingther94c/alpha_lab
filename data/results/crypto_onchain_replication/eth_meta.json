@@ -1,0 +1,7 @@
+{
+  "asset": "ETH",
+  "status": "cross-asset replication; exact BTC rule with no retuning",
+  "data_first": "2016-01-01",
+  "data_last": "2026-07-19",
+  "sol_status": "Coin Metrics Community catalog lacks the matching SOL metric set"
+}

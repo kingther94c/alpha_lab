@@ -1,0 +1,25 @@
+{
+  "candidate": "structural_scarcity_w365_qna_hold1_ma200",
+  "spec": {
+    "name": "structural_scarcity_w365_qna_hold1_ma200",
+    "family": "structural_scarcity",
+    "feature_window": 365,
+    "hold": 1,
+    "trend_window": 200,
+    "quantile": null,
+    "matched_control": "price_trend_ma200"
+  },
+  "observed_robust_score": 1.6789959425769692,
+  "observed_validation_excess_cagr": 0.6390860181020368,
+  "observed_validation_excess_sharpe": 1.6789959425769692,
+  "fixed_shift_p_value": 0.008264462809917356,
+  "familywise_shift_p_value": 0.008264462809917356,
+  "validation_block_bootstrap_28d": {
+    "return_p05": 0.9910169059312361,
+    "return_p50": 5.963166463208207,
+    "return_p95": 29.468632873975956,
+    "sharpe_p05": 0.777532763542349,
+    "sharpe_p50": 1.6637684347921324,
+    "sharpe_p95": 2.505177270786132
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "candidate": "structural_scarcity_w365_qna_hold1_ma200",
+  "spec": {
+    "name": "structural_scarcity_w365_qna_hold1_ma200",
+    "family": "structural_scarcity",
+    "feature_window": 365,
+    "hold": 1,
+    "trend_window": 200,
+    "quantile": null,
+    "matched_control": "price_trend_ma200"
+  },
+  "frozen_at_utc": "2026-07-20T13:43:16Z",
+  "selection_rule": "maximum minimum 2015-2019 development and 2020-2023 validation excess Sharpe among the 26 pre-declared cells, with turnover as tie-break",
+  "pre_release_review": {
+    "fixed_shift_p_value": 0.008264462809917356,
+    "familywise_shift_p_value": 0.008264462809917356,
+    "validation_block_bootstrap_sharpe_p05": 0.777532763542349,
+    "known_material_risk": "Coin Metrics current exchange-address labels may have been applied retrospectively; historical label vintages are unavailable in Community data"
+  },
+  "data_sha256": "39d6c441ccdba650d30764154c52af5d8b6056fb9e3c2114f3c49ac73536eccc",
+  "code_sha256": "B5BEEF44FAE52FBC5B6AD6CDD44399B4F6E1D9FDA2300F48DAA623B20A8ADE67",
+  "screen_metrics_sha256": "4FCAD459D58AE9A551D91692A75289A2F8C05553E5D7972E667AD701D9C7FA86",
+  "robustness_meta_sha256": "B825133C3AEAA432E7FB2ADA1DF00A3CF042E6C78A9C1DE37C92D9A7B95F5CAB"
+}

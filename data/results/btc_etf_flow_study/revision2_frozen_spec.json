@@ -1,0 +1,18 @@
+{
+  "candidate": "absorption_q70_hold5_ma50",
+  "spec": {
+    "name": "absorption_q70_hold5_ma50",
+    "family": "absorption",
+    "flow_window": null,
+    "trend_window": 50,
+    "quantile": 0.7,
+    "hold": 5,
+    "matched_control": "price_trend_ma50"
+  },
+  "frozen_at_utc": "2026-07-20T13:34:08Z",
+  "selection_rule": "maximum of the minimum 2024-development and 2025-validation excess Sharpe among the 24 pre-declared revision-2 cells",
+  "review_status_before_holdout": "provisional; historically profitable and delay/cost robust, but family-wise circular-shift p=0.179 and 2025 trades concentrated in H1",
+  "code_sha256": "8AF75BC846F130187B7A50807B88AA1928E82E5F88BB45282AB60939937E8814",
+  "development_metrics_sha256": "DE8B87531169698E672D69F50191E7B76EC0D46B7ADC5671DBCF76EC0038730A",
+  "robustness_meta_sha256": "9A364EBAF2AD6758837E53D18E58F6CC9D2366A4F61A257948D5A625195C6B11"
+}

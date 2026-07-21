@@ -1,0 +1,14 @@
+{
+  "candidate": "absorption_q70_hold5_ma50",
+  "spec": {
+    "name": "absorption_q70_hold5_ma50",
+    "family": "absorption",
+    "flow_window": null,
+    "trend_window": 50,
+    "quantile": 0.7,
+    "hold": 5,
+    "matched_control": "price_trend_ma50"
+  },
+  "selection_rule": "max min(development, validation) excess Sharpe among eligible revision-2 cells",
+  "holdout_frozen": false
+}

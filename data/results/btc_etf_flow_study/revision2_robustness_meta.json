@@ -1,0 +1,25 @@
+{
+  "candidate": "absorption_q70_hold5_ma50",
+  "spec": {
+    "name": "absorption_q70_hold5_ma50",
+    "family": "absorption",
+    "flow_window": null,
+    "trend_window": 50,
+    "quantile": 0.7,
+    "hold": 5,
+    "matched_control": "price_trend_ma50"
+  },
+  "observed_robust_score": 1.1270088733575088,
+  "observed_validation_excess_cagr": 0.15625189620196012,
+  "observed_validation_excess_sharpe": 1.2721411418939585,
+  "fixed_shift_p_value": 0.10945273631840796,
+  "familywise_shift_p_value": 0.1791044776119403,
+  "validation_block_bootstrap": {
+    "return_p05": -0.035430438617476155,
+    "return_p50": 0.14214538370511642,
+    "return_p95": 0.4586795263544615,
+    "sharpe_p05": -0.4588556165157166,
+    "sharpe_p50": 1.221617701412518,
+    "sharpe_p95": 2.508316569068698
+  }
+}

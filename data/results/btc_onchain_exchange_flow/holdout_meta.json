@@ -1,0 +1,8 @@
+{
+  "candidate": "structural_scarcity_w365_qna_hold1_ma200",
+  "frozen_at_utc": "2026-07-20T13:43:16Z",
+  "data_sha256": "39d6c441ccdba650d30764154c52af5d8b6056fb9e3c2114f3c49ac73536eccc",
+  "external_first": "2024-01-01",
+  "external_last": "2026-07-19",
+  "label_vintage_warning": "current exchange-address labels may backfill history"
+}
